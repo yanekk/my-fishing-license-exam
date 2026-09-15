@@ -1,0 +1,256 @@
+<title>Dopasuj Rybę do Wymiaru</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#f6f3ec; --card:#fffdf8; --ink:#1f2a2e; --ink-soft:#516066;
+    --line:#e2ddd0; --accent:#0e6b5c; --accent-deep:#0a5546; --accent-wash:#e4efe9;
+    --track:#e7e2d6; --know:#2f8f5b; --wrong:#c1533f;
+    --shadow:0 1px 2px rgba(31,42,46,.06),0 8px 24px rgba(31,42,46,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+      --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+      --track:#243032; --know:#54b97e; --wrong:#e0745f;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+    --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+    --track:#243032; --know:#54b97e; --wrong:#e0745f;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.45;padding-block:0;min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:16px 16px 72px}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-block:12px 6px;flex-wrap:wrap}
+  .brand{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.24rem}
+  .brand .fish{color:var(--accent)}
+  .region{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);
+    border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card)}
+  .lead{color:var(--ink-soft);font-size:.88rem;margin:8px 2px 14px;text-wrap:balance}
+
+  .layout{display:grid;grid-template-columns:190px 1fr;gap:18px;align-items:start}
+  /* left prompt column */
+  .prompt{position:sticky;top:12px}
+  .gauge{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .ring{--p:0;width:76px;height:76px;border-radius:50%;flex:none;position:relative;
+    background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--track) 0);display:grid;place-items:center}
+  .ring::before{content:"";position:absolute;width:56px;height:56px;border-radius:50%;background:var(--paper)}
+  .ring span{position:relative;font-family:"Fraunces",serif;font-weight:600;font-size:1.05rem}
+  .gauge .gt{font-size:.82rem;color:var(--ink-soft)}
+  .gauge .gt b{color:var(--ink);font-family:"Fraunces",serif;font-size:1rem}
+  .cue{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:8px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;
+    font-weight:600;font-size:1.12rem;padding:14px 18px;border-radius:14px;box-shadow:var(--shadow);
+    cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+  .chip.armed{outline:3px solid var(--accent-deep);outline-offset:2px}
+  .chip.shake{animation:shake .4s}
+  .chip .grip{opacity:.7;font-size:.9rem}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .streakdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);margin-left:2px}
+  .streakdot.on{background:#fff}
+  .toast{min-height:20px;margin-top:12px;font-size:.86rem;font-weight:600}
+  .toast.ok{color:var(--know)} .toast.no{color:var(--wrong)}
+  .ghost{position:fixed;z-index:99;pointer-events:none;background:var(--accent);color:#fff;font-weight:600;
+    padding:12px 16px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);font-size:1.05rem;transform:translate(-50%,-50%)}
+  .hint{font-size:.78rem;color:var(--ink-soft);margin-top:14px}
+
+  /* right chart / drop targets */
+  .tiers{display:flex;flex-direction:column;gap:9px}
+  .tier{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;border-radius:10px;padding:4px;
+    border:2px dashed transparent;transition:border-color .12s,background .12s}
+  .tier.over{border-color:var(--accent);background:var(--accent-wash)}
+  .tier.flash{animation:flash 1s}
+  @keyframes flash{0%,100%{background:transparent}30%{background:var(--accent-wash);border-color:var(--accent)}}
+  .cmnum{font-family:"Fraunces",serif;font-weight:600;font-size:1.35rem;text-align:right;font-variant-numeric:tabular-nums}
+  .cmnum small{font-size:.62rem;color:var(--ink-soft);font-family:"IBM Plex Sans",sans-serif;display:block;margin-top:-3px}
+  .bar{min-height:38px;border-radius:6px 8px 8px 6px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;
+    padding:6px 12px;color:#fff}
+  .bar.dark-txt{color:var(--ink)}
+  .placed{background:rgba(255,255,255,.22);border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:600}
+  .bar.dark-txt .placed{background:rgba(0,0,0,.10)}
+  .placed.pop{animation:pop .4s}
+  @keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+  .barempty{font-size:.78rem;opacity:.75;font-weight:500}
+  .foot{margin-top:22px;text-align:center}
+  .link{background:none;border:0;color:var(--ink-soft);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}
+  .done{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}
+  .done .big{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:600;margin:6px 0}
+  @media(max-width:520px){
+    .layout{grid-template-columns:1fr;gap:14px}
+    .prompt{position:sticky;top:0;z-index:5;background:var(--paper);padding:8px 0;border-bottom:1px solid var(--line)}
+    .gauge{margin-bottom:10px}
+    .tier{grid-template-columns:44px 1fr}.cmnum{font-size:1.15rem}
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="fish">🎣</span> Dopasuj Rybę do Wymiaru</div>
+    <span class="region">Okręg Gdański PZW</span>
+  </header>
+  <p class="lead">Przeciągnij (lub dotknij, potem wskaż) nazwę ryby na jej <b>wymiar ochronny</b>.
+    Dwa poprawne dopasowania i nazwa zostaje na wykresie na stałe.</p>
+
+  <div class="layout">
+    <div class="prompt">
+      <div class="gauge">
+        <div class="ring" id="ring"><span id="ringtxt">0%</span></div>
+        <div class="gt">Opanowane<br><b id="gt">0 / 0</b></div>
+      </div>
+      <div id="play">
+        <div class="cue">Ta ryba →</div>
+        <div class="chip" id="chip" tabindex="0">
+          <span class="grip">⠿</span><span id="chipname">—</span>
+          <span class="streakdot" id="d1"></span><span class="streakdot" id="d2"></span>
+        </div>
+        <div class="toast" id="toast"></div>
+        <p class="hint" id="hint">Celuj w odpowiedni słupek po prawej.</p>
+      </div>
+      <div id="alldone" class="done" hidden>
+        <div>🎣</div><div class="big">Gotowe!</div>
+        <p style="color:var(--ink-soft);margin:0;font-size:.86rem">Cały wykres opisany. Świetna robota.</p>
+      </div>
+    </div>
+
+    <div class="tiers" id="tiers"></div>
+  </div>
+
+  <div class="foot"><button class="link" id="resetbtn">Zacznij od nowa</button></div>
+</div>
+
+<script>
+/* size tiers (cm -> fish), Okręg Gdański — same data as the Wymiary chart */
+const SIZES=[
+ {cm:15, fish:["jelec","wzdręga"]},
+ {cm:18, fish:["okoń","sielawa"]},
+ {cm:25, fish:["jaź","kleń","lin","miętus","rozpiór","sapa","świnka"]},
+ {cm:30, fish:["certa","karp"]},
+ {cm:33, fish:["lipień","pstrąg potokowy"]},
+ {cm:35, fish:["łosoś","sieja","troć wędrowna"]},
+ {cm:40, fish:["boleń","brzana"]},
+ {cm:50, fish:["sandacz","szczupak","troć jeziorowa"]},
+ {cm:60, fish:["węgorz"]},
+ {cm:70, fish:["sum","głowacica"]},
+];
+const CM_OF={}; SIZES.forEach(t=>t.fish.forEach(f=>CM_OF[f]=t.cm));
+const ALL=Object.keys(CM_OF);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const $=id=>document.getElementById(id);
+
+const KEY="dopasuj-wymiar-gdansk-v1";
+let mastered={}; try{const s=localStorage.getItem(KEY); if(s)mastered=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(mastered));}catch(e){}}
+
+let queue=[], streak={}, miss={}, cur=null, armed=false, locked=false;
+function buildQueue(){queue=shuffle(ALL.filter(f=>!mastered[f])); streak={}; miss={};}
+
+function renderTiers(){
+  const el=$("tiers"), max=70; el.innerHTML="";
+  SIZES.forEach((t,i)=>{
+    const w=Math.max(20,t.cm/max*100), mix=32+i*(68/(SIZES.length-1)), light=i<3;
+    const placed=t.fish.filter(f=>mastered[f]).map(f=>'<span class="placed">'+f+'</span>').join("");
+    el.insertAdjacentHTML("beforeend",
+      '<div class="tier" data-cm="'+t.cm+'"><div class="cmnum">'+t.cm+'<small>cm</small></div>'+
+      '<div class="bar'+(light?' dark-txt':'')+'" style="width:'+w+'%;background:color-mix(in srgb,var(--accent) '+mix+'%,var(--card))">'+
+      (placed||'<span class="barempty">?</span>')+'</div></div>');
+  });
+}
+function renderGauge(){
+  const done=Object.keys(mastered).length, tot=ALL.length, pct=Math.round(done/tot*100);
+  $("ring").style.setProperty("--p",pct); $("ringtxt").textContent=pct+"%"; $("gt").textContent=done+" / "+tot;
+}
+function renderPrompt(){
+  if(queue.length===0){$("play").hidden=true; $("alldone").hidden=false; return;}
+  $("play").hidden=false; $("alldone").hidden=true;
+  cur=queue[0];
+  $("chipname").textContent=cur;
+  const s=streak[cur]||0;
+  $("d1").className="streakdot"+(s>=1?" on":""); $("d2").className="streakdot"+(s>=2?" on":"");
+  $("chip").classList.remove("armed"); armed=false;
+}
+function toast(msg,cls){const t=$("toast");t.textContent=msg;t.className="toast "+(cls||"");}
+
+/* ---- resolve a drop onto a tier element ---- */
+function resolve(tierEl){
+  if(locked||!tierEl||!cur) return;
+  const cm=+tierEl.dataset.cm, right=cm===CM_OF[cur];
+  if(right){
+    streak[cur]=(streak[cur]||0)+1; miss[cur]=0;
+    if(streak[cur]>=2){
+      mastered[cur]=true; save(); queue.shift();
+      renderTiers(); renderGauge();
+      const nb=[...document.querySelectorAll('.tier[data-cm="'+cm+'"] .placed')].pop();
+      if(nb) nb.classList.add("pop");
+      toast("Opanowane! ✓ "+cur+" — "+cm+" cm","ok");
+    } else {
+      // one more correct needed; send it a few places back so it's real recall
+      const f=queue.shift(); queue.splice(Math.min(4,queue.length),0,f);
+      toast("Dobrze! Wróci jeszcze raz.","ok");
+    }
+    renderPrompt();
+  } else {
+    // wrong: reveal the answer, then swap to a different fish so it can't be brute-forced.
+    locked=true; streak[cur]=0;
+    $("chip").classList.remove("shake"); void $("chip").offsetWidth; $("chip").classList.add("shake");
+    $("d1").className="streakdot"; $("d2").className="streakdot";
+    const good=document.querySelector('.tier[data-cm="'+CM_OF[cur]+'"]');
+    if(good){good.classList.remove("flash");void good.offsetWidth;good.classList.add("flash");}
+    toast("Nie — "+cur+" ma "+CM_OF[cur]+" cm. Wróci później.","no");
+    const missed=queue.shift(); queue.splice(Math.min(5,queue.length),0,missed);  // back into rotation
+    setTimeout(()=>{locked=false; renderPrompt();}, 900);
+  }
+}
+
+/* ---- pointer drag (works for mouse + touch) with tap fallback ---- */
+const chip=$("chip"); let ghost=null,dragging=false,sx=0,sy=0;
+function tierUnder(x,y){const e=document.elementFromPoint(x,y);return e&&e.closest?e.closest(".tier"):null;}
+function clearOver(){document.querySelectorAll(".tier.over").forEach(t=>t.classList.remove("over"));}
+chip.addEventListener("pointerdown",e=>{
+  if(!cur)return; e.preventDefault(); chip.setPointerCapture(e.pointerId);
+  dragging=false; sx=e.clientX; sy=e.clientY;
+});
+chip.addEventListener("pointermove",e=>{
+  if(!chip.hasPointerCapture||!chip.hasPointerCapture(e.pointerId))return;
+  if(!dragging && Math.hypot(e.clientX-sx,e.clientY-sy)<7)return;
+  if(!dragging){dragging=true; ghost=document.createElement("div");ghost.className="ghost";ghost.textContent=cur;document.body.appendChild(ghost);chip.style.cursor="grabbing";}
+  ghost.style.left=e.clientX+"px"; ghost.style.top=e.clientY+"px";
+  clearOver(); const t=tierUnder(e.clientX,e.clientY); if(t)t.classList.add("over");
+});
+chip.addEventListener("pointerup",e=>{
+  if(dragging){
+    const t=tierUnder(e.clientX,e.clientY);
+    if(ghost){ghost.remove();ghost=null;} clearOver(); chip.style.cursor="grab"; dragging=false;
+    resolve(t);
+  } else {
+    // tap: arm/disarm select mode
+    armed=!armed; chip.classList.toggle("armed",armed);
+    toast(armed?"Teraz dotknij właściwego słupka.":"","");
+  }
+});
+// tap fallback target selection
+$("tiers").addEventListener("click",e=>{const t=e.target.closest(".tier");if(t&&armed){resolve(t);}});
+// keyboard: Enter arms, then arrow not needed — click path covers it
+
+/* Two-tap reset. confirm()/alert() are blocked in the sandboxed artifact iframe,
+   so a native dialog silently returns and the button looks dead — confirm inline instead. */
+let confirming=false, confirmTimer=null;
+const resetbtn=$("resetbtn");
+resetbtn.addEventListener("click",()=>{
+  if(!confirming){
+    confirming=true; resetbtn.textContent="Na pewno? Dotknij, aby wyczyścić postęp";
+    confirmTimer=setTimeout(()=>{confirming=false;resetbtn.textContent="Zacznij od nowa";},3500);
+    return;
+  }
+  clearTimeout(confirmTimer); confirming=false; resetbtn.textContent="Zacznij od nowa";
+  mastered={}; save(); buildQueue(); renderTiers(); renderGauge(); renderPrompt();
+  toast("Wyczyszczono — zaczynamy od nowa.","");
+});
+
+buildQueue(); renderTiers(); renderGauge(); renderPrompt();
+</script>

@@ -1,0 +1,232 @@
+<title>Obce czy Rodzime?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#f6f3ec; --card:#fffdf8; --ink:#1f2a2e; --ink-soft:#516066;
+    --line:#e2ddd0; --accent:#0e6b5c; --accent-deep:#0a5546; --accent-wash:#e4efe9;
+    --track:#e7e2d6; --native:#2f8f5b; --native-wash:#e2efe6; --alien:#c1533f; --alien-wash:#f4ded7;
+    --shadow:0 1px 2px rgba(31,42,46,.06),0 8px 24px rgba(31,42,46,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+      --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+      --track:#243032; --native:#54b97e; --native-wash:#1b2c24; --alien:#e0745f; --alien-wash:#33211d;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+    --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+    --track:#243032; --native:#54b97e; --native-wash:#1b2c24; --alien:#e0745f; --alien-wash:#33211d;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.45;padding-block:0;min-height:100vh}
+  .wrap{max-width:660px;margin:0 auto;padding:16px 16px 72px}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-block:12px 6px;flex-wrap:wrap}
+  .brand{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.24rem}
+  .brand .fish{color:var(--accent)}
+  .region{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);
+    border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card)}
+  .lead{color:var(--ink-soft);font-size:.88rem;margin:8px 2px 14px;text-wrap:balance}
+
+  .prompt{position:sticky;top:0;z-index:5;background:var(--paper);padding:10px 0 14px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .gauge{display:flex;align-items:center;gap:12px}
+  .ring{--p:0;width:64px;height:64px;border-radius:50%;flex:none;position:relative;
+    background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--track) 0);display:grid;place-items:center}
+  .ring::before{content:"";position:absolute;width:46px;height:46px;border-radius:50%;background:var(--paper)}
+  .ring span{position:relative;font-family:"Fraunces",serif;font-weight:600;font-size:.9rem}
+  .gt{font-size:.78rem;color:var(--ink-soft)} .gt b{color:var(--ink);font-family:"Fraunces",serif;font-size:.95rem}
+  .cuebox{flex:1;min-width:150px}
+  .cue{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:6px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;
+    font-weight:600;font-size:1.1rem;padding:12px 16px;border-radius:14px;box-shadow:var(--shadow);
+    cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+  .chip.armed{outline:3px solid var(--accent-deep);outline-offset:2px}
+  .chip.shake{animation:shake .4s}
+  .chip .grip{opacity:.7;font-size:.9rem}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .streakdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);margin-left:2px}
+  .streakdot.on{background:#fff}
+  .toast{min-height:18px;margin-top:8px;font-size:.84rem;font-weight:600}
+  .toast.ok{color:var(--native)} .toast.no{color:var(--alien)}
+  .ghost{position:fixed;z-index:99;pointer-events:none;background:var(--accent);color:#fff;font-weight:600;
+    padding:11px 15px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);font-size:1rem;transform:translate(-50%,-50%)}
+
+  .buckets{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .bucket{border:2px dashed var(--line);border-radius:16px;padding:14px 12px;min-height:260px;
+    background:var(--card);transition:border-color .12s,background .12s}
+  .bucket.over.alien{border-color:var(--alien);background:var(--alien-wash)}
+  .bucket.over.native{border-color:var(--native);background:var(--native-wash)}
+  .bucket.flash.alien{animation:fa 1s} .bucket.flash.native{animation:fn 1s}
+  @keyframes fa{0%,100%{background:var(--card)}30%{background:var(--alien-wash);border-color:var(--alien)}}
+  @keyframes fn{0%,100%{background:var(--card)}30%{background:var(--native-wash);border-color:var(--native)}}
+  .bhead{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:10px}
+  .btitle{font-family:"Fraunces",serif;font-weight:600;font-size:1.05rem}
+  .bucket.alien .btitle{color:var(--alien)} .bucket.native .btitle{color:var(--native)}
+  .bcount{font-size:.72rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .bsub{font-size:.7rem;color:var(--ink-soft);margin:-6px 0 10px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+  .placed{border-radius:999px;padding:4px 11px;font-size:.82rem;font-weight:600;color:#fff}
+  .bucket.alien .placed{background:var(--alien)} .bucket.native .placed{background:var(--native)}
+  .placed.pop{animation:pop .4s}
+  @keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+  .bempty{font-size:.78rem;color:var(--ink-soft);opacity:.7}
+  .foot{margin-top:22px;text-align:center}
+  .link{background:none;border:0;color:var(--ink-soft);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}
+  .notes{margin-top:16px;font-size:.76rem;color:var(--ink-soft);text-wrap:balance}
+  .done{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+  .done .big{font-family:"Fraunces",serif;font-size:1.25rem;font-weight:600;margin:6px 0}
+  @media(max-width:380px){.chip{font-size:1rem}.bucket{min-height:220px;padding:12px 9px}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="fish">🐟</span> Obce czy Rodzime?</div>
+    <span class="region">Okręg Gdański PZW</span>
+  </header>
+  <p class="lead">Przeciągnij (lub dotknij, potem wskaż) rybę do właściwego kosza:
+    <b>gatunek obcy</b> czy <b>rodzimy</b>. Dwa poprawne dopasowania i ryba zostaje w koszu.</p>
+
+  <div class="prompt">
+    <div class="gauge"><div class="ring" id="ring"><span id="ringtxt">0%</span></div>
+      <div class="gt">Opanowane<br><b id="gt">0 / 0</b></div></div>
+    <div class="cuebox" id="play">
+      <div class="cue">Ta ryba →</div>
+      <div class="chip" id="chip" tabindex="0"><span class="grip">⠿</span><span id="chipname">—</span>
+        <span class="streakdot" id="d1"></span><span class="streakdot" id="d2"></span></div>
+      <div class="toast" id="toast"></div>
+    </div>
+    <div class="cuebox" id="alldone" hidden>
+      <div class="done" style="margin:0"><div class="big">🎣 Gotowe!</div>
+        <p style="color:var(--ink-soft);margin:0;font-size:.84rem">Wszystkie ryby posortowane.</p></div>
+    </div>
+  </div>
+
+  <div class="buckets" id="buckets">
+    <div class="bucket alien" data-key="obce">
+      <div class="bhead"><span class="btitle">Gatunki obce</span><span class="bcount" id="c-obce">0</span></div>
+      <div class="bsub">inwazyjne / nierodzime</div>
+      <div class="chips" id="ch-obce"><span class="bempty">upuść tutaj</span></div>
+    </div>
+    <div class="bucket native" data-key="rodzime">
+      <div class="bhead"><span class="btitle">Rodzime</span><span class="bcount" id="c-rodzime">0</span></div>
+      <div class="bsub">krajowe</div>
+      <div class="chips" id="ch-rodzime"><span class="bempty">upuść tutaj</span></div>
+    </div>
+  </div>
+
+  <p class="notes" id="notes"></p>
+  <div class="foot"><button class="link" id="resetbtn">Zacznij od nowa</button></div>
+</div>
+
+<script>
+/* Okręg Gdański / national corpus: foreign (obce) vs native (rodzime). */
+const FISH=[
+ // gatunki obce (from ustawa example set + rozporządzenie §8)
+ {n:"amur biały", g:"obce"}, {n:"tołpyga biała", g:"obce"}, {n:"tołpyga pstra", g:"obce"},
+ {n:"karaś srebrzysty", g:"obce"}, {n:"pstrąg tęczowy", g:"obce"}, {n:"sumik karłowaty", g:"obce"},
+ {n:"czebaczek amurski", g:"obce"}, {n:"trawianka", g:"obce"}, {n:"babka bycza", g:"obce"},
+ {n:"babka łysa", g:"obce"}, {n:"babka rurkonosa", g:"obce"}, {n:"babka szczupła", g:"obce"},
+ {n:"bass słoneczny", g:"obce"}, {n:"bass wielkogębowy", g:"obce"},
+ // rodzime (trap look-alikes + common natives)
+ {n:"pstrąg potokowy", g:"rodzime"}, {n:"sum", g:"rodzime"}, {n:"karp", g:"rodzime"},
+ {n:"sandacz", g:"rodzime"}, {n:"szczupak", g:"rodzime"}, {n:"węgorz", g:"rodzime"},
+ {n:"leszcz", g:"rodzime"}, {n:"lin", g:"rodzime"}, {n:"okoń", g:"rodzime"},
+ {n:"boleń", g:"rodzime"}, {n:"brzana", g:"rodzime"}, {n:"jaź", g:"rodzime"},
+ {n:"kleń", g:"rodzime"}, {n:"lipień", g:"rodzime"},
+];
+const G_OF={}; FISH.forEach(f=>G_OF[f.n]=f.g);
+const ALL=FISH.map(f=>f.n);
+const LABEL={obce:"gatunek obcy", rodzime:"gatunek rodzimy"};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const $=id=>document.getElementById(id);
+
+const KEY="obce-rodzime-gdansk-v1";
+let mastered={}; try{const s=localStorage.getItem(KEY);if(s)mastered=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(mastered));}catch(e){}}
+
+let queue=[], streak={}, cur=null, armed=false, locked=false;
+function buildQueue(){queue=shuffle(ALL.filter(f=>!mastered[f])); streak={};}
+
+function renderBuckets(){
+  ["obce","rodzime"].forEach(k=>{
+    const names=FISH.filter(f=>f.g===k && mastered[f.n]).map(f=>f.n);
+    $("c-"+k).textContent=names.length;
+    $("ch-"+k).innerHTML = names.length? names.map(n=>'<span class="placed">'+n+'</span>').join("")
+      : '<span class="bempty">upuść tutaj</span>';
+  });
+}
+function renderGauge(){
+  const done=Object.keys(mastered).length, tot=ALL.length, pct=Math.round(done/tot*100);
+  $("ring").style.setProperty("--p",pct); $("ringtxt").textContent=pct+"%"; $("gt").textContent=done+" / "+tot;
+}
+function renderPrompt(){
+  if(queue.length===0){$("play").hidden=true;$("alldone").hidden=false;return;}
+  $("play").hidden=false;$("alldone").hidden=true;
+  cur=queue[0]; $("chipname").textContent=cur;
+  const s=streak[cur]||0;
+  $("d1").className="streakdot"+(s>=1?" on":""); $("d2").className="streakdot"+(s>=2?" on":"");
+  $("chip").classList.remove("armed"); armed=false;
+}
+function toast(m,c){const t=$("toast");t.textContent=m;t.className="toast "+(c||"");}
+
+function resolve(bucketEl){
+  if(locked||!bucketEl||!cur) return;
+  const key=bucketEl.dataset.key, right=key===G_OF[cur];
+  if(right){
+    streak[cur]=(streak[cur]||0)+1;
+    if(streak[cur]>=2){
+      mastered[cur]=true; save(); queue.shift(); renderBuckets(); renderGauge();
+      const nb=[...document.querySelectorAll('#ch-'+key+' .placed')].pop(); if(nb) nb.classList.add("pop");
+      toast("Opanowane! ✓ "+cur+" — "+LABEL[key],"ok");
+    } else { const f=queue.shift(); queue.splice(Math.min(4,queue.length),0,f); toast("Dobrze! Wróci jeszcze raz.","ok"); }
+    renderPrompt();
+  } else {
+    locked=true; streak[cur]=0;
+    $("chip").classList.remove("shake"); void $("chip").offsetWidth; $("chip").classList.add("shake");
+    $("d1").className="streakdot"; $("d2").className="streakdot";
+    const good=document.querySelector('.bucket[data-key="'+G_OF[cur]+'"]');
+    if(good){good.classList.remove("flash");void good.offsetWidth;good.classList.add("flash");}
+    toast("Nie — "+cur+" to "+LABEL[G_OF[cur]]+". Wróci później.","no");
+    const missed=queue.shift(); queue.splice(Math.min(5,queue.length),0,missed);
+    setTimeout(()=>{locked=false; renderPrompt();}, 1000);
+  }
+}
+
+/* pointer drag (mouse + touch) with tap fallback — same model as the other drills */
+const chip=$("chip"); let ghost=null,dragging=false,sx=0,sy=0;
+function bucketUnder(x,y){const e=document.elementFromPoint(x,y);return e&&e.closest?e.closest(".bucket"):null;}
+function clearOver(){document.querySelectorAll(".bucket.over").forEach(t=>t.classList.remove("over"));}
+chip.addEventListener("pointerdown",e=>{ if(!cur)return; e.preventDefault(); chip.setPointerCapture(e.pointerId); dragging=false; sx=e.clientX; sy=e.clientY; });
+chip.addEventListener("pointermove",e=>{
+  if(!chip.hasPointerCapture||!chip.hasPointerCapture(e.pointerId))return;
+  if(!dragging && Math.hypot(e.clientX-sx,e.clientY-sy)<7)return;
+  if(!dragging){dragging=true;ghost=document.createElement("div");ghost.className="ghost";ghost.textContent=cur;document.body.appendChild(ghost);chip.style.cursor="grabbing";}
+  ghost.style.left=e.clientX+"px"; ghost.style.top=e.clientY+"px";
+  clearOver(); const t=bucketUnder(e.clientX,e.clientY); if(t)t.classList.add("over");
+});
+chip.addEventListener("pointerup",e=>{
+  if(dragging){ const t=bucketUnder(e.clientX,e.clientY);
+    if(ghost){ghost.remove();ghost=null;} clearOver(); chip.style.cursor="grab"; dragging=false; resolve(t);
+  } else { armed=!armed; chip.classList.toggle("armed",armed); toast(armed?"Teraz dotknij właściwego kosza.":"",""); }
+});
+$("buckets").addEventListener("click",e=>{const t=e.target.closest(".bucket"); if(t&&armed){resolve(t);}});
+
+/* two-tap reset (confirm() is blocked in the sandboxed artifact iframe) */
+let confirming=false, confirmTimer=null; const resetbtn=$("resetbtn");
+resetbtn.addEventListener("click",()=>{
+  if(!confirming){confirming=true;resetbtn.textContent="Na pewno? Dotknij, aby wyczyścić postęp";
+    confirmTimer=setTimeout(()=>{confirming=false;resetbtn.textContent="Zacznij od nowa";},3500);return;}
+  clearTimeout(confirmTimer);confirming=false;resetbtn.textContent="Zacznij od nowa";
+  mastered={};save();buildQueue();renderBuckets();renderGauge();renderPrompt();toast("Wyczyszczono — zaczynamy od nowa.","");
+});
+
+$("notes").innerHTML="Pułapki: pstrąg <b>tęczowy</b> jest obcy, a <b>potokowy</b> rodzimy; <b>sumik karłowaty</b> obcy, a <b>sum</b> rodzimy; <b>karaś srebrzysty</b> obcy. Karp jest zadomowiony i traktowany jako rodzimy.";
+buildQueue(); renderBuckets(); renderGauge(); renderPrompt();
+</script>

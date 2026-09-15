@@ -1,0 +1,285 @@
+<title>Dopasuj Rybę do Okresu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#f6f3ec; --card:#fffdf8; --ink:#1f2a2e; --ink-soft:#516066;
+    --line:#e2ddd0; --accent:#0e6b5c; --accent-deep:#0a5546; --accent-wash:#e4efe9;
+    --track:#e7e2d6; --know:#2f8f5b; --wrong:#c1533f;
+    --open:#efece3; --grid:#e1ddd0;
+    --grp-green:#3f9d5a; --grp-blue:#2f6fb0; --grp-red:#c1533f; --grp-yellow:#c8981f; --grp-neutral:#8a8676;
+    --shadow:0 1px 2px rgba(31,42,46,.06),0 8px 24px rgba(31,42,46,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+      --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+      --track:#243032; --know:#54b97e; --wrong:#e0745f;
+      --open:#232c2e; --grid:#313f3f;
+      --grp-green:#54b97e; --grp-blue:#5fa0e0; --grp-red:#e0745f; --grp-yellow:#e0b84a; --grp-neutral:#9a9686;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+    --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+    --track:#243032; --know:#54b97e; --wrong:#e0745f;
+    --open:#232c2e; --grid:#313f3f;
+    --grp-green:#54b97e; --grp-blue:#5fa0e0; --grp-red:#e0745f; --grp-yellow:#e0b84a; --grp-neutral:#9a9686;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.45;padding-block:0;min-height:100vh}
+  .wrap{max-width:820px;margin:0 auto;padding:16px 16px 72px}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-block:12px 6px;flex-wrap:wrap}
+  .brand{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.2rem}
+  .brand .fish{color:var(--accent)}
+  .region{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);
+    border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card)}
+  .lead{color:var(--ink-soft);font-size:.88rem;margin:8px 2px 14px;text-wrap:balance}
+
+  .layout{display:grid;grid-template-columns:200px 1fr;gap:18px;align-items:start}
+  .prompt{position:sticky;top:12px}
+  .gauge{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .ring{--p:0;width:76px;height:76px;border-radius:50%;flex:none;position:relative;
+    background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--track) 0);display:grid;place-items:center}
+  .ring::before{content:"";position:absolute;width:56px;height:56px;border-radius:50%;background:var(--paper)}
+  .ring span{position:relative;font-family:"Fraunces",serif;font-weight:600;font-size:1.05rem}
+  .gauge .gt{font-size:.82rem;color:var(--ink-soft)}
+  .gauge .gt b{color:var(--ink);font-family:"Fraunces",serif;font-size:1rem}
+  .cue{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);margin-bottom:8px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;
+    font-weight:600;font-size:1.12rem;padding:14px 18px;border-radius:14px;box-shadow:var(--shadow);
+    cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+  .chip.armed{outline:3px solid var(--accent-deep);outline-offset:2px}
+  .chip.shake{animation:shake .4s}
+  .chip .grip{opacity:.7;font-size:.9rem}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .streakdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);margin-left:2px}
+  .streakdot.on{background:#fff}
+  .toast{min-height:20px;margin-top:12px;font-size:.86rem;font-weight:600}
+  .toast.ok{color:var(--know)} .toast.no{color:var(--wrong)}
+  .ghost{position:fixed;z-index:99;pointer-events:none;background:var(--accent);color:#fff;font-weight:600;
+    padding:12px 16px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.3);font-size:1.05rem;transform:translate(-50%,-50%)}
+  .hint{font-size:.78rem;color:var(--ink-soft);margin-top:14px}
+  .legend{display:flex;gap:14px;font-size:.76rem;color:var(--ink-soft);margin-top:14px;flex-wrap:wrap}
+  .legend i{width:14px;height:10px;border-radius:3px;display:inline-block;vertical-align:middle;margin-right:5px}
+  .legend i.g{background:var(--grp-green)}.legend i.b{background:var(--grp-blue)}.legend i.r{background:var(--grp-red)}.legend i.y{background:var(--grp-yellow)}
+
+  /* right: month header + range rows (drop targets) */
+  .rhead,.srow{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:center}
+  .rhead{padding:2px 6px 6px}
+  .months{display:grid;grid-template-columns:repeat(12,1fr)}
+  .months span{font-size:.58rem;font-weight:600;color:var(--ink-soft);text-align:center}
+  .rhl{font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);text-align:right}
+  .rows{display:flex;flex-direction:column;gap:6px}
+  .srow{border:2px dashed transparent;border-radius:10px;padding:6px;transition:border-color .12s,background .12s}
+  .srow.over{border-color:var(--accent);background:var(--accent-wash)}
+  .srow.flash{animation:flash 1s}
+  @keyframes flash{0%,100%{background:transparent}30%{background:var(--accent-wash);border-color:var(--accent)}}
+  .rlab .rdate{font-weight:600;font-size:.82rem;font-variant-numeric:tabular-nums;line-height:1.2}
+  .rlab .rfish{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+  .placed{background:var(--accent);color:#fff;border-radius:999px;padding:2px 9px;font-size:.74rem;font-weight:600}
+  .placed.pop{animation:pop .4s}
+  @keyframes pop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+  .mtrack{position:relative;height:22px;border-radius:5px;overflow:hidden;background-color:var(--open);
+    background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/12 - 1px),var(--grid) calc(100%/12 - 1px),var(--grid) calc(100%/12));}
+  .seg{position:absolute;top:3px;bottom:3px;border-radius:4px}
+  .seg.g{background:var(--grp-green)}.seg.b{background:var(--grp-blue)}.seg.r{background:var(--grp-red)}.seg.y{background:var(--grp-yellow)}.seg.n{background:var(--grp-neutral)}
+  .foot{margin-top:22px;text-align:center}
+  .link{background:none;border:0;color:var(--ink-soft);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}
+  .notes{margin-top:16px;font-size:.76rem;color:var(--ink-soft)}
+  .done{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center}
+  .done .big{font-family:"Fraunces",serif;font-size:1.3rem;font-weight:600;margin:6px 0}
+  @media(max-width:560px){
+    .layout{grid-template-columns:1fr;gap:14px}
+    .prompt{position:sticky;top:0;z-index:5;background:var(--paper);padding:8px 0;border-bottom:1px solid var(--line)}
+    .gauge{margin-bottom:10px}
+    .rhead,.srow{grid-template-columns:104px 1fr;gap:7px}
+    .rlab .rdate{font-size:.74rem}
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="fish">🐟</span> Dopasuj Rybę do Okresu</div>
+    <span class="region">Okręg Gdański PZW</span>
+  </header>
+  <p class="lead">Przeciągnij (lub dotknij, potem wskaż) rybę na jej <b>okres ochronny</b>.
+    Dwa poprawne dopasowania i nazwa zostaje na wykresie. Kolor paska grupuje okresy — patrz legenda.</p>
+
+  <div class="layout">
+    <div class="prompt">
+      <div class="gauge">
+        <div class="ring" id="ring"><span id="ringtxt">0%</span></div>
+        <div class="gt">Opanowane<br><b id="gt">0 / 0</b></div>
+      </div>
+      <div id="play">
+        <div class="cue">Ta ryba →</div>
+        <div class="chip" id="chip" tabindex="0">
+          <span class="grip">⠿</span><span id="chipname">—</span>
+          <span class="streakdot" id="d1"></span><span class="streakdot" id="d2"></span>
+        </div>
+        <div class="toast" id="toast"></div>
+        <p class="hint">Wskaż pasek z właściwymi miesiącami ochrony.</p>
+        <div class="legend"><span><i class="g"></i>od 1 I</span><span><i class="b"></i>wiosna III–IV</span><span><i class="r"></i>jesień → 31 XII</span><span><i class="y"></i>przełom roku</span></div>
+      </div>
+      <div id="alldone" class="done" hidden>
+        <div>🎣</div><div class="big">Gotowe!</div>
+        <p style="color:var(--ink-soft);margin:0;font-size:.86rem">Wszystkie okresy dopasowane. Brawo.</p>
+      </div>
+    </div>
+
+    <div>
+      <div class="rhead"><div class="rhl">miesiąc →</div>
+        <div class="months"><span>I</span><span>II</span><span>III</span><span>IV</span><span>V</span><span>VI</span><span>VII</span><span>VIII</span><span>IX</span><span>X</span><span>XI</span><span>XII</span></div></div>
+      <div class="rows" id="rows"></div>
+      <div class="notes" id="notes"></div>
+    </div>
+  </div>
+
+  <div class="foot"><button class="link" id="resetbtn">Zacznij od nowa</button></div>
+</div>
+
+<script>
+/* Okręg Gdański closed seasons: periods on a 0..12 month axis (wrap = two segments). Ordered by start. */
+const SEASONS=[
+ {n:"boleń", txt:"1 I – 30 IV", p:[[0,4]]},
+ {n:"sandacz", txt:"1 I – 31 V", p:[[0,5]]},
+ {n:"sum", txt:"1 I – 31 V", p:[[0,5]]},
+ {n:"szczupak", txt:"1 I – 30 IV", p:[[0,4]]},
+ {n:"świnka", txt:"1 I – 15 V", p:[[0,4.5]]},
+ {n:"brzana", txt:"1 I – 30 VI", p:[[0,6]]},
+ {n:"certa", txt:"1 I – 30 VI", p:[[0,6]]},
+ {n:"brzanka", txt:"cały rok", p:[[0,12]]},
+ {n:"okoń", txt:"1 III – 30 IV", p:[[2,4]]},
+ {n:"lipień", txt:"1 III – 31 V", p:[[2,5]]},
+ {n:"sapa", txt:"1 IV – 31 V", p:[[3,5]]},
+ {n:"pstrąg potokowy", txt:"1 IX – 31 XII", p:[[8,12]]},
+ {n:"troć jeziorowa", txt:"1 IX – 31 I", p:[[8,12],[0,1]]},
+ {n:"łosoś", txt:"1 X – 31 XII", p:[[9,12]]},
+ {n:"troć wędrowna", txt:"1 X – 31 XII", p:[[9,12]]},
+ {n:"sieja", txt:"15 X – 31 XII", p:[[9.5,12]]},
+ {n:"sielawa", txt:"15 X – 31 XII", p:[[9.5,12]]},
+ {n:"węgorz", txt:"1 XII – 31 III", p:[[11,12],[0,3]]},
+ {n:"miętus", txt:"1 XII – koniec II", p:[[11,12],[0,2]]},
+];
+// colour groups for memorisation (g=zielony, b=niebieski, r=czerwony, y=żółty; brzanka -> neutral 'n')
+const GROUP={
+ "boleń":"g","sandacz":"g","sum":"g","szczupak":"g","świnka":"g","brzana":"g","certa":"g",
+ "okoń":"b","lipień":"b","sapa":"b",
+ "pstrąg potokowy":"r","łosoś":"r","troć wędrowna":"r","sieja":"r","sielawa":"r",
+ "troć jeziorowa":"y","węgorz":"y","miętus":"y",
+};
+const TXT_OF={}; SEASONS.forEach(s=>TXT_OF[s.n]=s.txt);
+const ALL=SEASONS.map(s=>s.n);
+
+/* distinct ranges, in first-appearance (chronological) order */
+const RANGES=[];
+SEASONS.forEach((s)=>{
+  let r=RANGES.find(r=>r.txt===s.txt);
+  if(!r){r={txt:s.txt, p:s.p, g:(GROUP[s.n]||'n'), fish:[]}; RANGES.push(r);}
+  r.fish.push(s.n);
+});
+
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const $=id=>document.getElementById(id);
+
+const KEY="dopasuj-okres-gdansk-v1";
+let mastered={}; try{const s=localStorage.getItem(KEY);if(s)mastered=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(mastered));}catch(e){}}
+
+let queue=[], streak={}, cur=null, armed=false, locked=false;
+function buildQueue(){queue=shuffle(ALL.filter(f=>!mastered[f])); streak={};}
+
+function segHtml(r){return r.p.map(([s,e])=>'<div class="seg '+r.g+'" style="left:'+(s/12*100)+'%;width:'+((e-s)/12*100)+'%"></div>').join("");}
+function renderRows(){
+  const el=$("rows"); el.innerHTML="";
+  RANGES.forEach(r=>{
+    const placed=r.fish.filter(f=>mastered[f]).map(f=>'<span class="placed">'+f+'</span>').join("");
+    el.insertAdjacentHTML("beforeend",
+      '<div class="srow" data-key="'+r.txt+'"><div class="rlab"><div class="rdate">'+r.txt+'</div>'+
+      '<div class="rfish">'+placed+'</div></div>'+
+      '<div class="mtrack">'+segHtml(r)+'</div></div>');
+  });
+}
+function renderGauge(){
+  const done=Object.keys(mastered).length, tot=ALL.length, pct=Math.round(done/tot*100);
+  $("ring").style.setProperty("--p",pct); $("ringtxt").textContent=pct+"%"; $("gt").textContent=done+" / "+tot;
+}
+function renderPrompt(){
+  if(queue.length===0){$("play").hidden=true;$("alldone").hidden=false;return;}
+  $("play").hidden=false;$("alldone").hidden=true;
+  cur=queue[0]; $("chipname").textContent=cur;
+  const s=streak[cur]||0;
+  $("d1").className="streakdot"+(s>=1?" on":""); $("d2").className="streakdot"+(s>=2?" on":"");
+  $("chip").classList.remove("armed"); armed=false;
+}
+function toast(m,c){const t=$("toast");t.textContent=m;t.className="toast "+(c||"");}
+
+function resolve(rowEl){
+  if(locked||!rowEl||!cur) return;
+  const key=rowEl.dataset.key, right=key===TXT_OF[cur];
+  if(right){
+    streak[cur]=(streak[cur]||0)+1;
+    if(streak[cur]>=2){
+      mastered[cur]=true; save(); queue.shift(); renderRows(); renderGauge();
+      const nb=[...document.querySelectorAll('.srow[data-key="'+cssEsc(key)+'"] .placed')].pop();
+      if(nb) nb.classList.add("pop");
+      toast("Opanowane! ✓ "+cur+" — "+key,"ok");
+    } else {
+      const f=queue.shift(); queue.splice(Math.min(4,queue.length),0,f);
+      toast("Dobrze! Wróci jeszcze raz.","ok");
+    }
+    renderPrompt();
+  } else {
+    locked=true; streak[cur]=0;
+    $("chip").classList.remove("shake"); void $("chip").offsetWidth; $("chip").classList.add("shake");
+    $("d1").className="streakdot"; $("d2").className="streakdot";
+    const good=document.querySelector('.srow[data-key="'+cssEsc(TXT_OF[cur])+'"]');
+    if(good){good.classList.remove("flash");void good.offsetWidth;good.classList.add("flash");}
+    toast("Nie — "+cur+": "+TXT_OF[cur]+". Wróci później.","no");
+    const missed=queue.shift(); queue.splice(Math.min(5,queue.length),0,missed);
+    setTimeout(()=>{locked=false; renderPrompt();}, 1000);
+  }
+}
+function cssEsc(s){return s.replace(/"/g,'\\"');}
+
+/* pointer drag (mouse + touch) with tap fallback — identical model to the sizes drill */
+const chip=$("chip"); let ghost=null,dragging=false,sx=0,sy=0;
+function rowUnder(x,y){const e=document.elementFromPoint(x,y);return e&&e.closest?e.closest(".srow"):null;}
+function clearOver(){document.querySelectorAll(".srow.over").forEach(t=>t.classList.remove("over"));}
+chip.addEventListener("pointerdown",e=>{
+  if(!cur)return; e.preventDefault(); chip.setPointerCapture(e.pointerId);
+  dragging=false; sx=e.clientX; sy=e.clientY;
+});
+chip.addEventListener("pointermove",e=>{
+  if(!chip.hasPointerCapture||!chip.hasPointerCapture(e.pointerId))return;
+  if(!dragging && Math.hypot(e.clientX-sx,e.clientY-sy)<7)return;
+  if(!dragging){dragging=true;ghost=document.createElement("div");ghost.className="ghost";ghost.textContent=cur;document.body.appendChild(ghost);chip.style.cursor="grabbing";}
+  ghost.style.left=e.clientX+"px"; ghost.style.top=e.clientY+"px";
+  clearOver(); const t=rowUnder(e.clientX,e.clientY); if(t)t.classList.add("over");
+});
+chip.addEventListener("pointerup",e=>{
+  if(dragging){
+    const t=rowUnder(e.clientX,e.clientY);
+    if(ghost){ghost.remove();ghost=null;} clearOver(); chip.style.cursor="grab"; dragging=false;
+    resolve(t);
+  } else { armed=!armed; chip.classList.toggle("armed",armed); toast(armed?"Teraz dotknij właściwego paska.":"",""); }
+});
+$("rows").addEventListener("click",e=>{const t=e.target.closest(".srow"); if(t&&armed){resolve(t);}});
+
+/* two-tap reset (confirm() is blocked in the sandboxed artifact iframe) */
+let confirming=false, confirmTimer=null; const resetbtn=$("resetbtn");
+resetbtn.addEventListener("click",()=>{
+  if(!confirming){confirming=true;resetbtn.textContent="Na pewno? Dotknij, aby wyczyścić postęp";
+    confirmTimer=setTimeout(()=>{confirming=false;resetbtn.textContent="Zacznij od nowa";},3500);return;}
+  clearTimeout(confirmTimer);confirming=false;resetbtn.textContent="Zacznij od nowa";
+  mastered={};save();buildQueue();renderRows();renderGauge();renderPrompt();toast("Wyczyszczono — zaczynamy od nowa.","");
+});
+
+$("notes").innerHTML="Wyjątki rzeczne (certa, łosoś, troć) i skracanie o dzień świąteczny — jak w wykresie „Sezony i Wymiary”. Tu ćwiczysz wartość główną.";
+buildQueue(); renderRows(); renderGauge(); renderPrompt();
+</script>

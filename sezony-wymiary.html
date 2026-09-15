@@ -1,0 +1,270 @@
+<title>Sezony i Wymiary Ochronne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#f6f3ec; --card:#fffdf8; --ink:#1f2a2e; --ink-soft:#516066;
+    --line:#e2ddd0; --accent:#0e6b5c; --accent-deep:#0a5546; --accent-wash:#e4efe9;
+    --open:#efece3; --grid:#e1ddd0; --closed:#c1533f;
+    --grp-green:#3f9d5a; --grp-blue:#2f6fb0; --grp-red:#c1533f; --grp-yellow:#c8981f; --grp-neutral:#8a8676;
+    --today:#1f2a2e; --sel:rgba(14,107,92,.16);
+    --shadow:0 1px 2px rgba(31,42,46,.06),0 8px 24px rgba(31,42,46,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+      --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+      --open:#232c2e; --grid:#313f3f; --closed:#e0745f;
+      --grp-green:#54b97e; --grp-blue:#5fa0e0; --grp-red:#e0745f; --grp-yellow:#e0b84a; --grp-neutral:#9a9686;
+      --today:#e9ede9; --sel:rgba(63,183,156,.2);
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+    --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+    --open:#232c2e; --grid:#313f3f; --closed:#e0745f;
+    --grp-green:#54b97e; --grp-blue:#5fa0e0; --grp-red:#e0745f; --grp-yellow:#e0b84a; --grp-neutral:#9a9686;
+    --today:#e9ede9; --sel:rgba(63,183,156,.2);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.45;padding-block:0;min-height:100vh}
+  .wrap{max-width:720px;margin:0 auto;padding:16px 16px 72px}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-block:12px 6px;flex-wrap:wrap}
+  .brand{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.28rem}
+  .brand .fish{color:var(--accent)}
+  .region{font-size:.66rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);
+    border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card)}
+  .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:5px;box-shadow:var(--shadow);margin:14px 0 18px}
+  .tab{flex:1;border:0;background:transparent;color:var(--ink-soft);font:inherit;font-weight:600;
+    padding:11px 8px;border-radius:10px;cursor:pointer;font-size:.9rem}
+  .tab[aria-selected="true"]{background:var(--accent);color:#fff}
+  .lead{color:var(--ink-soft);font-size:.9rem;margin:0 2px 14px;text-wrap:balance}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:.8rem;color:var(--ink-soft);margin:0 2px 12px}
+  .legend .sw{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:16px;height:12px;border-radius:3px;display:inline-block}
+  .legend i.open{background:var(--open);border:1px solid var(--grid)}
+  .legend i.green{background:var(--grp-green)}
+  .legend i.blue{background:var(--grp-blue)}
+  .legend i.red{background:var(--grp-red)}
+  .legend i.yellow{background:var(--grp-yellow)}
+  .legend i.today{width:2px;height:14px;background:var(--today);border-radius:0}
+
+  /* ---- month header + timeline ---- */
+  .tl-head,.row{display:grid;grid-template-columns:132px 1fr;gap:10px;align-items:center}
+  .months{display:grid;grid-template-columns:repeat(12,1fr)}
+  .months button{border:0;background:transparent;color:var(--ink-soft);font:inherit;font-size:.6rem;font-weight:600;
+    padding:5px 0;cursor:pointer;border-radius:6px;letter-spacing:.02em}
+  .months button[aria-pressed="true"]{background:var(--accent);color:#fff}
+  .tl-head{position:sticky;top:0;background:var(--paper);z-index:3;padding:6px 0 8px}
+  .tl-head .hl{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);text-align:right}
+  .rows{display:flex;flex-direction:column;gap:4px}
+  .row{padding:3px 0}
+  .rlab{min-width:0}
+  .rlab .nm{font-weight:600;font-size:.86rem;line-height:1.15}
+  .rlab .dt{font-size:.72rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+  .rlab .nm sup{color:var(--closed);font-weight:700}
+  .track{position:relative;height:24px;border-radius:6px;overflow:hidden;background-color:var(--open);
+    background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/12 - 1px),var(--grid) calc(100%/12 - 1px),var(--grid) calc(100%/12));}
+  .bar{position:absolute;top:3px;bottom:3px;border-radius:4px;z-index:2}
+  .bar.g{background:var(--grp-green)}.bar.b{background:var(--grp-blue)}.bar.r{background:var(--grp-red)}.bar.y{background:var(--grp-yellow)}.bar.n{background:var(--grp-neutral)}
+  .sel{position:absolute;top:0;bottom:0;background:var(--sel);z-index:1}
+  .todayline{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--today);z-index:4}
+  .caption{margin:14px 2px 0;font-size:.9rem;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px}
+  .caption b{color:var(--ink)}
+  .notes{margin:16px 2px 0;font-size:.78rem;color:var(--ink-soft)}
+  .notes h4{margin:0 0 6px;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}
+  .notes li{margin-bottom:4px}
+
+  /* ---- sizes ---- */
+  .tier{display:grid;grid-template-columns:64px 1fr;gap:14px;align-items:center;margin-bottom:14px}
+  .cmnum{font-family:"Fraunces",serif;font-weight:600;font-size:1.5rem;text-align:right;font-variant-numeric:tabular-nums}
+  .cmnum small{font-size:.7rem;color:var(--ink-soft);font-family:"IBM Plex Sans",sans-serif;display:block;margin-top:-2px}
+  .sizebar-wrap{min-width:0}
+  .sizebar{height:30px;border-radius:6px 8px 8px 6px;display:flex;align-items:center;padding:0 12px;color:#fff;
+    font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sizebar.dark-txt{color:var(--ink)}
+  @media(max-width:460px){
+    .tl-head,.row{grid-template-columns:96px 1fr;gap:7px}
+    .rlab .nm{font-size:.78rem}.rlab .dt{font-size:.66rem}
+    .tier{grid-template-columns:52px 1fr;gap:10px}.cmnum{font-size:1.25rem}
+    .sizebar{font-size:.72rem;padding:0 9px}
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="fish">🐟</span> Sezony i Wymiary Ochronne</div>
+    <span class="region">Okręg Gdański PZW</span>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" id="tab-sez" onclick="show('sez')">Okresy ochronne</button>
+    <button class="tab" role="tab" aria-selected="false" id="tab-wym" onclick="show('wym')">Wymiary</button>
+  </div>
+
+  <!-- ============ SEZONY ============ -->
+  <section id="sez">
+    <p class="lead">Pasek = <b>okres ochronny</b> (nie wolno łowić), przerwa = można łowić.
+      Kolor grupuje gatunki dla łatwiejszego zapamiętania. Dotknij miesiąca, aby zobaczyć, co jest wtedy chronione.</p>
+    <div class="legend">
+      <span class="sw"><i class="open"></i> można łowić</span>
+      <span class="sw"><i class="green"></i> od 1 stycznia</span>
+      <span class="sw"><i class="blue"></i> start wiosną (III–IV)</span>
+      <span class="sw"><i class="red"></i> jesień, koniec 31 XII</span>
+      <span class="sw"><i class="yellow"></i> przez przełom roku</span>
+      <span class="sw"><i class="today"></i> dziś</span>
+    </div>
+
+    <div class="tl-head">
+      <div class="hl">miesiąc →</div>
+      <div class="months" id="months"></div>
+    </div>
+    <div class="rows" id="rows"></div>
+
+    <div class="caption" id="caption"></div>
+
+    <div class="notes">
+      <h4>Wyjątki i uwagi</h4>
+      <ul id="season-notes"></ul>
+      <p style="margin:8px 0 0">Jeśli pierwszy lub ostatni dzień okresu ochronnego wypada w dzień
+        ustawowo wolny od pracy, okres skraca się o ten dzień — <b>z wyjątkiem węgorza i jesiotra ostronosego</b>.</p>
+    </div>
+  </section>
+
+  <!-- ============ WYMIARY ============ -->
+  <section id="wym" hidden>
+    <p class="lead">Minimalny wymiar, poniżej którego rybę trzeba wypuścić. Ułożone od najmniejszego —
+      <b>zapamiętuj grupami</b>: najwięcej gatunków (7) ma wymiar 25 cm.</p>
+    <div id="tiers"></div>
+    <div class="notes">
+      <h4>Uwagi</h4>
+      <ul>
+        <li><b>karp</b> — 30 cm nie dotyczy rzek.</li>
+        <li><b>okoń</b> — 18 cm za wyjątkiem wód górskich.</li>
+        <li><b>lipień</b> i <b>pstrąg potokowy</b> — 33 cm, a na rzece Reda 35 cm.</li>
+        <li>Wymiar mierzy się od początku głowy do najdalszego krańca płetwy ogonowej.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+const MONTHS_R=["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+const MONTHS_PL=["styczniu","lutym","marcu","kwietniu","maju","czerwcu","lipcu","sierpniu","wrześniu","październiku","listopadzie","grudniu"];
+const DAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
+
+/* protected periods on a 0..12 month axis; [start,end]. Wrap = two segments. */
+const SEASONS=[
+ {n:"boleń", txt:"1 I – 30 IV", p:[[0,4]]},
+ {n:"sandacz", txt:"1 I – 31 V", p:[[0,5]]},
+ {n:"sum", txt:"1 I – 31 V", p:[[0,5]]},
+ {n:"szczupak", txt:"1 I – 30 IV", p:[[0,4]]},
+ {n:"świnka", txt:"1 I – 15 V", p:[[0,4.5]]},
+ {n:"brzana", txt:"1 I – 30 VI", p:[[0,6]]},
+ {n:"certa", txt:"1 I – 30 VI", p:[[0,6]], ex:1},
+ {n:"brzanka / brzana karpacka", txt:"cały rok", p:[[0,12]], ex:1},
+ {n:"okoń", txt:"1 III – 30 IV", p:[[2,4]], ex:1},
+ {n:"lipień", txt:"1 III – 31 V", p:[[2,5]]},
+ {n:"sapa", txt:"1 IV – 31 V", p:[[3,5]]},
+ {n:"pstrąg potokowy", txt:"1 IX – 31 XII", p:[[8,12]]},
+ {n:"troć jeziorowa", txt:"1 IX – 31 I", p:[[8,12],[0,1]]},
+ {n:"łosoś", txt:"1 X – 31 XII", p:[[9,12]], ex:1},
+ {n:"troć wędrowna", txt:"1 X – 31 XII", p:[[9,12]], ex:1},
+ {n:"sieja", txt:"15 X – 31 XII", p:[[9.5,12]]},
+ {n:"sielawa", txt:"15 X – 31 XII", p:[[9.5,12]]},
+ {n:"węgorz", txt:"1 XII – 31 III", p:[[11,12],[0,3]]},
+ {n:"miętus", txt:"1 XII – koniec II", p:[[11,12],[0,2]]},
+];
+// colour groups for memorisation (g=zielony, b=niebieski, r=czerwony, y=żółty)
+const GROUP={
+ "boleń":"g","sandacz":"g","sum":"g","szczupak":"g","świnka":"g","brzana":"g","certa":"g",
+ "okoń":"b","lipień":"b","sapa":"b",
+ "pstrąg potokowy":"r","łosoś":"r","troć wędrowna":"r","sieja":"r","sielawa":"r",
+ "troć jeziorowa":"y","węgorz":"y","miętus":"y",
+};  // brzanka (cały rok) not listed by the user -> neutral 'n'
+const SEASON_NOTES=[
+ "<b>certa</b> — w Wiśle od zapory we Włocławku do ujścia: 1 IX – 30 XI.",
+ "<b>brzanka / brzana karpacka</b> — chroniona przez cały rok.",
+ "<b>okoń</b> — nie dotyczy obwodu Wda nr 10.",
+ "<b>łosoś</b> i <b>troć</b> — w Wiśle poniżej Włocławka: 1 XII – koniec lutego; dodatkowo 1 III – 31 VIII zakaz połowu w piątki, soboty i niedziele.",
+];
+
+const SIZES=[
+ {cm:15, fish:["jelec","wzdręga"]},
+ {cm:18, fish:["okoń","sielawa"]},
+ {cm:25, fish:["jaź","kleń","lin","miętus","rozpiór","sapa","świnka"]},
+ {cm:30, fish:["certa","karp"]},
+ {cm:33, fish:["lipień","pstrąg potokowy"]},
+ {cm:35, fish:["łosoś","sieja","troć wędrowna"]},
+ {cm:40, fish:["boleń","brzana"]},
+ {cm:50, fish:["sandacz","szczupak","troć jeziorowa"]},
+ {cm:60, fish:["węgorz"]},
+ {cm:70, fish:["sum","głowacica"]},
+];
+
+const $=id=>document.getElementById(id);
+const now=new Date();
+const todayPos=now.getMonth()+(now.getDate()-1)/DAYS[now.getMonth()];
+let selMonth=now.getMonth();  // default: highlight current month
+
+/* does species protect during calendar month m (0..11)? overlap of [m,m+1] with any period */
+function protectedIn(sp,m){return sp.p.some(([s,e])=>s<m+1 && e>m);}
+
+function renderMonths(){
+  const el=$("months"); el.innerHTML="";
+  MONTHS_R.forEach((r,m)=>{const b=document.createElement("button");b.textContent=r;
+    b.setAttribute("aria-pressed",selMonth===m);
+    b.onclick=()=>{selMonth=(selMonth===m?-1:m);renderMonths();renderRows();renderCaption();};
+    el.appendChild(b);});
+}
+function renderRows(){
+  const el=$("rows"); el.innerHTML="";
+  SEASONS.forEach((sp,idx)=>{
+    const row=document.createElement("div");row.className="row";
+    const nm=sp.n+(sp.ex?' <sup>*</sup>':'');
+    const g=GROUP[sp.n]||'n';
+    let bars="";
+    sp.p.forEach(([s,e])=>{bars+='<div class="bar '+g+'" style="left:'+(s/12*100)+'%;width:'+((e-s)/12*100)+'%"></div>';});
+    let sel = selMonth>=0 ? '<div class="sel" style="left:'+(selMonth/12*100)+'%;width:'+(100/12)+'%"></div>' : '';
+    row.innerHTML=
+      '<div class="rlab"><div class="nm">'+nm+'</div><div class="dt">'+sp.txt+'</div></div>'+
+      '<div class="track">'+sel+bars+'<div class="todayline" style="left:'+(todayPos/12*100)+'%"></div></div>';
+    el.appendChild(row);
+  });
+}
+function renderCaption(){
+  const c=$("caption");
+  if(selMonth<0){c.innerHTML="Dotknij miesiąca powyżej, aby zobaczyć, które gatunki są wtedy w okresie ochronnym.";return;}
+  const prot=SEASONS.filter(sp=>protectedIn(sp,selMonth)).map(sp=>sp.n);
+  if(prot.length===0) c.innerHTML="W <b>"+MONTHS_PL[selMonth]+"</b> żaden z gatunków nie jest chroniony — wszystkie można łowić. 🎣";
+  else c.innerHTML="W <b>"+MONTHS_PL[selMonth]+"</b> chronione ("+prot.length+"): "+prot.join(", ")+".";
+}
+function renderNotes(){$("season-notes").innerHTML=SEASON_NOTES.map(n=>"<li>"+n+"</li>").join("");}
+
+function renderTiers(){
+  const max=70, el=$("tiers"); el.innerHTML="";
+  SIZES.forEach((t,i)=>{
+    const w=Math.max(16,t.cm/max*100);
+    const mix=30+i*(70/(SIZES.length-1));           // 30%..100% accent = light->dark sequential
+    const light=i<3;                                 // pale bars need dark text
+    el.insertAdjacentHTML("beforeend",
+      '<div class="tier"><div class="cmnum">'+t.cm+'<small>cm</small></div>'+
+      '<div class="sizebar-wrap"><div class="sizebar'+(light?' dark-txt':'')+
+        '" style="width:'+w+'%;background:color-mix(in srgb,var(--accent) '+mix+'%,var(--card))">'+
+        t.fish.join(", ")+'</div></div></div>');
+  });
+}
+
+function show(which){
+  $("sez").hidden=which!=="sez"; $("wym").hidden=which!=="wym";
+  $("tab-sez").setAttribute("aria-selected",which==="sez");
+  $("tab-wym").setAttribute("aria-selected",which==="wym");
+}
+renderMonths();renderRows();renderCaption();renderNotes();renderTiers();
+</script>
