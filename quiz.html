@@ -1,0 +1,554 @@
+<title>Karta Wędkarska — Trener</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#f6f3ec; --card:#fffdf8; --ink:#1f2a2e; --ink-soft:#516066;
+    --line:#e2ddd0; --accent:#0e6b5c; --accent-deep:#0a5546; --accent-wash:#e4efe9;
+    --know:#2f8f5b; --hard:#c8891f; --dontknow:#c1533f; --track:#e7e2d6;
+    --shadow:0 1px 2px rgba(31,42,46,.06),0 8px 24px rgba(31,42,46,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+      --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+      --know:#54b97e; --hard:#daa64a; --dontknow:#e0745f; --track:#243032;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#12191b; --card:#1a2325; --ink:#e9ede9; --ink-soft:#9db0af;
+    --line:#2a3639; --accent:#3fb79c; --accent-deep:#2f8f7a; --accent-wash:#1c2c2a;
+    --know:#54b97e; --hard:#daa64a; --dontknow:#e0745f; --track:#243032;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;line-height:1.5;padding-block:0;min-height:100vh}
+  .wrap{max-width:660px;margin:0 auto;padding:16px 18px 72px}
+  header.top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-block:12px 8px;flex-wrap:wrap}
+  .brand{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:1.3rem;letter-spacing:.01em}
+  .brand .fish{color:var(--accent)}
+  .region{font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);
+    border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:var(--card)}
+  .tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:5px;box-shadow:var(--shadow);margin:14px 0 18px}
+  .tab{flex:1;border:0;background:transparent;color:var(--ink-soft);font:inherit;font-weight:600;
+    padding:11px 8px;border-radius:10px;cursor:pointer;font-size:.9rem}
+  .tab[aria-selected="true"]{background:var(--accent);color:#fff}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:24px 22px}
+  .cat{font-size:.7rem;text-transform:uppercase;letter-spacing:.11em;color:var(--accent);font-weight:600;margin-bottom:12px}
+  .q{font-family:"Fraunces",Georgia,serif;font-size:1.4rem;font-weight:600;line-height:1.3;text-wrap:balance;margin:0}
+  .src{font-size:.72rem;color:var(--ink-soft);margin-top:14px}
+  .answer{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line);font-size:1.06rem}
+  .answer .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-soft);display:block;margin-bottom:6px}
+  .actions{display:flex;gap:10px;margin-top:22px}
+  .btn{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-weight:600;
+    padding:13px 10px;border-radius:12px;cursor:pointer;font-size:.92rem}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.primary:hover{background:var(--accent-deep)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .grade{display:flex;gap:10px;margin-top:22px}
+  .grade button{flex:1;border:1.5px solid var(--line);background:var(--card);font:inherit;font-weight:600;
+    padding:12px 6px;border-radius:12px;cursor:pointer;font-size:.9rem;display:flex;flex-direction:column;gap:2px;align-items:center}
+  .grade .tiny{font-size:.66rem;font-weight:400;color:var(--ink-soft)}
+  .grade .g-know{border-color:var(--know);color:var(--know)}
+  .grade .g-hard{border-color:var(--hard);color:var(--hard)}
+  .grade .g-no{border-color:var(--dontknow);color:var(--dontknow)}
+  .grade button:hover{filter:brightness(.97);transform:translateY(-1px)}
+  .opts{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  .opt{display:flex;gap:12px;align-items:center;border:1.5px solid var(--line);background:var(--card);color:var(--ink);
+    font:inherit;text-align:left;padding:13px 15px;border-radius:12px;cursor:pointer;font-size:.98rem}
+  .opt .key{font-weight:600;color:var(--ink-soft);min-width:16px}
+  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt:disabled{cursor:default}
+  .opt.correct{border-color:var(--know);background:var(--accent-wash);color:var(--know)}
+  .opt.correct .key{color:var(--know)}
+  .opt.wrong{border-color:var(--dontknow);background:color-mix(in srgb,var(--dontknow) 12%,var(--card))}
+  .opt.wrong .key{color:var(--dontknow)}
+  .meta{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--ink-soft);margin-bottom:10px}
+  .meta b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .progress{height:6px;border-radius:999px;background:var(--track);overflow:hidden;margin-bottom:16px}
+  .progress>span{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .3s}
+  /* gauge / stats */
+  .gauge{display:flex;align-items:center;gap:18px;margin-bottom:16px}
+  .ring{--p:0;width:92px;height:92px;border-radius:50%;flex:none;
+    background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--track) 0);
+    display:grid;place-items:center}
+  .ring::before{content:"";position:absolute;width:68px;height:68px;border-radius:50%;background:var(--card)}
+  .ring span{position:relative;font-family:"Fraunces",serif;font-weight:600;font-size:1.35rem}
+  .gauge .g-txt h3{margin:0 0 2px;font-family:"Fraunces",serif;font-size:1.15rem;font-weight:600}
+  .gauge .g-txt p{margin:0;font-size:.86rem;color:var(--ink-soft)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+  .chip{border:1px solid var(--line);background:var(--card);color:var(--ink-soft);font:inherit;font-size:.8rem;
+    padding:6px 11px;border-radius:999px;cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .bar-row{margin-bottom:12px}
+  .bar-row .lab{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:5px;gap:10px}
+  .bar-row .lab b{font-variant-numeric:tabular-nums;color:var(--ink-soft);font-weight:500}
+  .bar{height:8px;border-radius:999px;background:var(--track);overflow:hidden}
+  .bar>span{display:block;height:100%;border-radius:999px;background:var(--accent)}
+  .bar.mid>span{background:var(--hard)}
+  .bar.low>span{background:var(--dontknow)}
+  .score{font-family:"Fraunces",serif;font-size:2.7rem;font-weight:600;line-height:1}
+  .score.pass{color:var(--know)} .score.fail{color:var(--dontknow)}
+  .verdict{font-weight:600;margin:4px 0 20px}
+  .verdict.pass{color:var(--know)} .verdict.fail{color:var(--dontknow)}
+  h2.rt{font-family:"Fraunces",serif;font-weight:600;margin:0 0 4px;font-size:1.5rem}
+  .miss{border-top:1px solid var(--line);margin-top:20px;padding-top:16px}
+  .miss h4{margin:0 0 10px;font-size:.9rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em}
+  .miss-item{font-size:.92rem;margin-bottom:12px}
+  .miss-item .mq{font-weight:600}
+  .miss-item .ma{color:var(--know)}
+  .hint{font-size:.8rem;color:var(--ink-soft);margin-top:16px;text-align:center;text-wrap:balance}
+  .empty{text-align:center;padding:20px 0}
+  .empty .big{font-family:"Fraunces",serif;font-size:1.35rem;font-weight:600;margin:8px 0}
+  .foot{margin-top:20px;text-align:center}
+  .link{background:none;border:0;color:var(--ink-soft);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}
+  .cfg{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 4px;justify-content:center}
+  @media(max-width:430px){.grade{flex-direction:column}.q{font-size:1.24rem}.gauge{gap:14px}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="fish">🎣</span> Karta&nbsp;Wędkarska · Trener</div>
+    <span class="region">Okręg Gdański PZW</span>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" id="tab-learn" onclick="show('learn')">Nauka</button>
+    <button class="tab" role="tab" aria-selected="false" id="tab-exam" onclick="show('exam')">Egzamin próbny</button>
+    <button class="tab" role="tab" aria-selected="false" id="tab-stats" onclick="show('stats')">Postępy</button>
+  </div>
+
+  <!-- ================= NAUKA ================= -->
+  <section id="learn">
+    <div class="gauge">
+      <div class="ring" id="l-ring" style="position:relative"><span id="l-ringtxt">0%</span></div>
+      <div class="g-txt">
+        <h3 id="l-gh">Opanowane: 0 / 0</h3>
+        <p id="l-gp">Oceń każdą kartę. „Umiem” dwa razy — karta znika na dziś.</p>
+      </div>
+    </div>
+    <div class="chips" id="l-chips"></div>
+    <div class="meta"><span>W kolejce: <b id="l-left">0</b></span><span id="l-cat-lbl"></span></div>
+
+    <div class="card" id="l-card">
+      <div class="cat" id="l-cat"></div>
+      <p class="q" id="l-q"></p>
+      <div id="l-answer" hidden class="answer">
+        <span class="lbl">Odpowiedź</span>
+        <span id="l-a"></span>
+        <div class="src" id="l-src"></div>
+      </div>
+      <div id="l-reveal" class="actions"><button class="btn primary" onclick="reveal()">Pokaż odpowiedź</button></div>
+      <div id="l-grade" class="grade" hidden>
+        <button class="g-no"   onclick="grade('nie')">Nie znam<span class="tiny">wróci za chwilę</span></button>
+        <button class="g-hard" onclick="grade('prawie')">Prawie<span class="tiny">wróci później</span></button>
+        <button class="g-know" onclick="grade('umiem')">Umiem<span class="tiny">1 z 2</span></button>
+      </div>
+    </div>
+
+    <div class="card empty" id="l-done" hidden>
+      <div class="empty"><div>✅</div><div class="big" id="l-done-msg">Gotowe!</div>
+        <p style="color:var(--ink-soft);margin:0">Opanowałeś wszystkie karty w tym zakresie.</p>
+        <div class="actions"><button class="btn" onclick="restartSession()">Powtórz jeszcze raz</button>
+          <button class="btn primary" onclick="show('exam')">Sprawdź się na egzaminie</button></div></div>
+    </div>
+    <p class="hint">Fiszki na fakty, liczby i listy. „Nie znam” wraca po kilku kartach, „Prawie” — pod koniec rundy.</p>
+  </section>
+
+  <!-- ================= EGZAMIN ================= -->
+  <section id="exam" hidden>
+    <div id="exam-intro" class="card">
+      <div class="cat">Egzamin próbny</div>
+      <p class="q">Test jednokrotnego wyboru</p>
+      <p style="color:var(--ink-soft);margin:12px 0 0">Losowy zestaw pytań ze wszystkich działów, jak na prawdziwym
+        egzaminie. Próg zaliczenia: <b>70%</b>. Po każdej odpowiedzi zobaczysz, która była poprawna.</p>
+      <div class="cfg" id="e-lens"></div>
+      <div class="actions"><button class="btn primary" onclick="startExam()">Rozpocznij egzamin</button></div>
+    </div>
+
+    <div id="exam-run" hidden>
+      <div class="meta"><span>Pytanie <b id="e-n">1</b> / <b id="e-tot">20</b></span><span>Wynik: <b id="e-sc">0</b></span></div>
+      <div class="progress"><span id="e-prog" style="width:0%"></span></div>
+      <div class="card">
+        <div class="cat" id="e-cat"></div>
+        <p class="q" id="e-q"></p>
+        <div class="opts" id="e-opts"></div>
+        <div class="src" id="e-src" hidden></div>
+      </div>
+    </div>
+
+    <div id="exam-results" hidden class="card">
+      <h2 class="rt">Wynik egzaminu próbnego</h2>
+      <div class="score" id="r-score">0 / 0</div>
+      <div class="verdict" id="r-verdict"></div>
+      <div id="r-bars"></div>
+      <div class="miss" id="r-miss"></div>
+      <div class="actions"><button class="btn" onclick="startExam()">Jeszcze raz</button>
+        <button class="btn primary" onclick="show('learn')">Ćwicz słabe działy</button></div>
+    </div>
+  </section>
+
+  <!-- ================= POSTĘPY ================= -->
+  <section id="stats" hidden>
+    <div class="gauge">
+      <div class="ring" id="s-ring" style="position:relative"><span id="s-ringtxt">0%</span></div>
+      <div class="g-txt"><h3 id="s-gh">Opanowane: 0 / 0</h3><p id="s-gp"></p></div>
+    </div>
+    <div id="s-bars"></div>
+    <div class="foot"><button class="link" onclick="resetAll()">Wyczyść cały postęp</button></div>
+    <p class="hint">Postęp zapisuje się w tej przeglądarce. Najsłabsze działy są na dole — od nich zacznij.</p>
+  </section>
+</div>
+
+<script>
+/* ---------- helpers to build many multiple-choice items cheaply ---------- */
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function sizeMC(cm){
+  const pool=[15,18,25,30,33,35,40,45,50,60,70].filter(v=>v!==cm);
+  const opts=shuffle([cm,...shuffle(pool).slice(0,3)]);
+  return {opts:opts.map(v=>v+" cm"),correct:opts.indexOf(cm)};
+}
+const ALL_SEASONS=["1 stycznia – 30 kwietnia","1 stycznia – 31 maja","1 stycznia – 30 czerwca","1 marca – 31 maja",
+  "1 marca – 30 kwietnia","1 grudnia – 31 marca","1 września – 31 stycznia","1 września – 31 grudnia",
+  "15 października – 31 grudnia","1 kwietnia – 31 maja","1 stycznia – 15 maja","1 grudnia – koniec lutego"];
+function seasonMC(ans){
+  const pool=ALL_SEASONS.filter(v=>v!==ans);
+  const opts=shuffle([ans,...shuffle(pool).slice(0,3)]);
+  return {opts,correct:opts.indexOf(ans)};
+}
+
+/* ---------- Gdańsk-authoritative species tables ---------- */
+const SIZES=[["sandacza",50],["szczupaka",50],["węgorza",60],["suma",70],["bolenia",40],["brzany",40],["certy",30],
+  ["jazia",25],["jelca",15],["klenia",25],["lina",25],["lipienia",33],["łososia",35],["miętusa",25],["okonia",18],
+  ["pstrąga potokowego",33],["siei",35],["sielawy",18],["świnki",25],["troci wędrownej",35],["troci jeziorowej",50],
+  ["wzdręgi",15],["karpia",30],["sapy",25],["głowacicy",70]];
+const SEASONS=[["szczupaka","1 stycznia – 30 kwietnia"],["sandacza","1 stycznia – 31 maja"],["suma","1 stycznia – 31 maja"],
+  ["bolenia","1 stycznia – 30 kwietnia"],["okonia","1 marca – 30 kwietnia"],["węgorza","1 grudnia – 31 marca"],
+  ["lipienia","1 marca – 31 maja"],["brzany","1 stycznia – 30 czerwca"],["troci jeziorowej","1 września – 31 stycznia"],
+  ["świnki","1 stycznia – 15 maja"],["siei","15 października – 31 grudnia"],["sielawy","15 października – 31 grudnia"],
+  ["sapy","1 kwietnia – 31 maja"],["pstrąga potokowego","1 września – 31 grudnia"]];
+
+/* ---------- curated question bank ---------- */
+const R="RAPR / PZW Okręg Gdański", RZ="Rozporządzenie MRiRW z 12.07.2023", U="Ustawa o rybactwie śródlądowym (1985)";
+let ID=0; const q=o=>({id:"q"+(ID++),...o});
+
+const CURATED=[
+ // --- Przepisy, dokumenty, kontrola ---
+ q({cat:"Przepisy i dokumenty",q:"Kto jest zwolniony z obowiązku posiadania karty wędkarskiej?",
+   a:"Osoby do 14 lat (mogą łowić tylko pod opieką pełnoletniego posiadacza karty) oraz cudzoziemcy czasowo przebywający w Polsce.",src:U,
+   opts:["Osoby do 14 lat i cudzoziemcy czasowo przebywający w Polsce","Wszyscy członkowie PZW","Osoby powyżej 65 lat","Osoby łowiące z brzegu"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Jakie dokumenty musi mieć wędkarz łowiący w obwodzie rybackim?",
+   a:"Kartę wędkarską, zezwolenie na amatorski połów ryb oraz rejestr połowu wydany do tego zezwolenia.",src:U,
+   opts:["Karta wędkarska, zezwolenie i rejestr połowu","Tylko karta wędkarska","Tylko zezwolenie","Dowód osobisty i karta"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Czy sama karta wędkarska wystarczy do łowienia w wodach uprawnionego do rybactwa?",
+   a:"Nie. Potrzebne jest jeszcze zezwolenie wydane przez uprawnionego do rybactwa (użytkownika obwodu) oraz rejestr, jeśli zezwolenie tego wymaga.",src:U,
+   opts:["Nie — potrzebne jest też zezwolenie uprawnionego do rybactwa","Tak, karta wystarczy","Tak, jeśli jest się członkiem PZW","Nie, potrzebny jest tylko rejestr"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Kto jest zwolniony z obowiązku zdawania egzaminu na kartę wędkarską?",
+   a:"Osoba posiadająca średnie lub wyższe wykształcenie z zakresu rybactwa.",src:U,
+   opts:["Osoba z wykształceniem z zakresu rybactwa","Każdy członek PZW","Osoba powyżej 60 lat","Nikt"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Kto wydaje zezwolenie na amatorski połów ryb?",
+   a:"Użytkownik (uprawniony do rybactwa) danego obwodu rybackiego.",src:U,
+   opts:["Użytkownik obwodu rybackiego","Starosta","Państwowa Straż Rybacka","Urząd marszałkowski"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Ile kosztuje wydanie karty wędkarskiej?",
+   a:"10 zł.",src:RZ,opts:["10 zł","25 zł","50 zł","Bezpłatnie"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Kto jest uprawniony do kontroli wędkarza na wodach PZW?",
+   a:"M.in. Państwowa Straż Rybacka, Społeczna Straż Rybacka, Policja, Straż Leśna, Straż Graniczna oraz uprawniony do rybactwa.",src:R,
+   opts:["PSR, SSR, Policja, Straż Leśna i Graniczna","Wyłącznie Policja","Tylko Państwowa Straż Rybacka","Tylko strażnicy PZW"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Co wędkarz ma obowiązek okazać na żądanie kontrolującego?",
+   a:"Dokumenty, sprzęt wędkarski, złowione ryby oraz przynęty.",src:R,
+   opts:["Dokumenty, sprzęt, złowione ryby i przynęty","Tylko kartę wędkarską","Tylko złowione ryby","Nic — kontrola jest dobrowolna"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Czy wolno sprzedawać ryby złowione na wędkę?",
+   a:"Nie. Ryb z amatorskiego połowu nie wolno wprowadzać do obrotu (sprzedawać).",src:R,
+   opts:["Nie","Tak","Tak, po okazaniu karty","Tak, poza okresem ochronnym"],correct:0}),
+ q({cat:"Przepisy i dokumenty",q:"Czy wolno budować pomosty wędkarskie bez pozwolenia?",
+   a:"Nie. Konieczna jest zgoda użytkownika wody oraz decyzja administracyjna właściwego organu.",src:R,
+   opts:["Nie","Tak, na wodach PZW","Tak, jeśli pomost jest tymczasowy","Tak"],correct:0}),
+
+ // --- Zasady wędkowania i sprzęt ---
+ q({cat:"Zasady wędkowania i sprzęt",q:"Jaka jest minimalna długość wędziska?",
+   a:"Co najmniej 30 cm.",src:RZ,opts:["30 cm","20 cm","50 cm","1 m"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"Iloma wędkami wolno łowić jednocześnie (metoda gruntowo-spławikowa)?",
+   a:"Dwiema wędkami, każda z jednym haczykiem z przynętą naturalną.",src:R,
+   opts:["Dwiema","Jedną","Trzema","Dowolną liczbą"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"Przy jakich metodach wolno łowić tylko na jedną wędkę?",
+   a:"Spinningowej, muchowej i trollingowej, a także przy połowie ryb łososiowatych i lipienia.",src:R,
+   opts:["Spinning, mucha, trolling","Gruntowa i spławikowa","Podlodowa","Wszystkie metody dopuszczają 2 wędki"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"Iloma haczykami można uzbroić wędkę przy przynęcie naturalnej?",
+   a:"Jednym haczykiem (jedną kotwiczką).",src:RZ,opts:["Jednym","Dwoma","Trzema","Dowolnie"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"Jaki jest dobowy limit połowu węgorza wg rozporządzenia?",
+   a:"Do 2 sztuk na dobę.",src:RZ,opts:["2 sztuki","Bez limitu","5 sztuk","1 sztuka"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"Jakie wymiary musi mieć podrywka do pozyskiwania ryb na przynętę?",
+   a:"Siatka nie większa niż 1 m × 1 m, wielkość oczka nie mniejsza niż 5 mm.",src:RZ,
+   opts:["1 m × 1 m, oczko min. 5 mm","2 m × 2 m, oczko 1 cm","0,5 m × 0,5 m, oczko 3 mm","Dowolne"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"Co uznaje się za mormyszkę?",
+   a:"Przynętę w postaci jednolitego korpusu dowolnego kształtu i koloru, o długości nie większej niż 15 mm, z jednym wtopionym haczykiem o pojedynczym ostrzu.",src:R,
+   opts:["Jednolity korpus do 15 mm z jednym ostrzem","Sztuczną rybkę z kotwiczką","Kulę wodną","Spławik obciążony"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"Jaki obowiązkowy przyrząd musi mieć przy sobie wędkarz (Okręg Gdański)?",
+   a:"Przyrząd do wyjmowania haczyków z pysków ryb.",src:R,
+   opts:["Przyrząd do wyjmowania haczyków","Wagę","Podbierak","Latarkę"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"W jakim promieniu wędkarz musi utrzymać czystość brzegu?",
+   a:"W promieniu 5 m od zajmowanego stanowiska — niezależnie od stanu zastanego.",src:R,
+   opts:["5 m","1 m","10 m","20 m"],correct:0}),
+ q({cat:"Zasady wędkowania i sprzęt",q:"Czy wolno łowić nocą na wodach PZW Okręgu Gdańskiego?",
+   a:"Tak, można wędkować całą dobę — z wyjątkiem wód górskich (krainy pstrąga i lipienia), gdzie wolno łowić tylko od świtu do zmierzchu.",src:R,
+   opts:["Tak, poza wodami górskimi","Nie, nigdy","Tylko latem","Tylko za zgodą PSR"],correct:0}),
+
+ // --- Metody i odległości ---
+ q({cat:"Metody i odległości",q:"Jaką minimalną odległość zachować od budowli piętrzących i przepławek?",
+   a:"Nie mniejszą niż 50 m.",src:R,opts:["50 m","25 m","75 m","10 m"],correct:0}),
+ q({cat:"Metody i odległości",q:"Jaką odległość zachować od rozstawionych i oznakowanych sieci rybackich?",
+   a:"Nie mniejszą niż 50 m.",src:R,opts:["50 m","25 m","75 m","100 m"],correct:0}),
+ q({cat:"Metody i odległości",q:"Jaką odległość zachować od znaku wskazującego połów kuszą?",
+   a:"Nie mniejszą niż 75 m.",src:U,opts:["75 m","50 m","25 m","100 m"],correct:0}),
+ q({cat:"Metody i odległości",q:"Minimalny odstęp między wędkującymi z brzegu metodą gruntowo-spławikową?",
+   a:"10 m.",src:R,opts:["10 m","25 m","50 m","5 m"],correct:0}),
+ q({cat:"Metody i odległości",q:"Minimalny odstęp przy spinningu łowiąc z brzegu lub brodząc?",
+   a:"25 m.",src:R,opts:["25 m","10 m","50 m","75 m"],correct:0}),
+ q({cat:"Metody i odległości",q:"Minimalny odstęp przy metodzie trollingowej?",
+   a:"50 m od innych wędkujących.",src:R,opts:["50 m","25 m","75 m","10 m"],correct:0}),
+ q({cat:"Metody i odległości",q:"Minimalny odstęp przy wędkowaniu podlodowym?",
+   a:"10 m od innych wędkujących.",src:R,opts:["10 m","25 m","5 m","50 m"],correct:0}),
+ q({cat:"Metody i odległości",q:"Jaką maksymalną średnicę mogą mieć otwory w lodzie i jaki odstęp między nimi?",
+   a:"Otwór o średnicy nie większej niż 20 cm, odstęp między otworami nie mniejszy niż 1 m.",src:R,
+   opts:["Otwór do 20 cm, odstęp min. 1 m","Otwór do 30 cm, odstęp 0,5 m","Otwór do 10 cm, odstęp 2 m","Bez ograniczeń"],correct:0}),
+ q({cat:"Metody i odległości",q:"W jakim promieniu od żółtego pływaka wolno łowić kuszą?",
+   a:"W promieniu nie większym niż 50 m od żółtego pływaka o wyporności co najmniej 5 litrów.",src:RZ,
+   opts:["50 m","25 m","75 m","100 m"],correct:0}),
+ q({cat:"Metody i odległości",q:"W jakich godzinach wolno łowić kuszą?",
+   a:"Wyłącznie w porze dziennej: po upływie godziny od wschodu słońca i nie później niż na godzinę przed zachodem słońca.",src:RZ,
+   opts:["Tylko w dzień: od godz. po wschodzie do godz. przed zachodem słońca","O każdej porze","Tylko nocą","Od świtu do północy"],correct:0}),
+
+ // --- Ochrona ryb: zasady ---
+ q({cat:"Ochrona gatunkowa i obce",q:"Co zrobić po złowieniu ryby niewymiarowej lub w okresie ochronnym?",
+   a:"Niezwłocznie i z ostrożnością wypuścić ją z powrotem do wody (do tego samego łowiska).",src:R,
+   opts:["Natychmiast wypuścić z powrotem","Zabrać do domu","Oddać strażnikowi","Uśmiercić"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Jak ustala się wymiar (długość) ryby?",
+   a:"Mierzy się długość całkowitą — od początku głowy (zamkniętego pyska) do najdalszego krańca płetwy ogonowej w naturalnym ułożeniu.",src:RZ,
+   opts:["Od początku głowy do końca płetwy ogonowej","Od oka do ogona","Tylko tułów bez głowy","Obwód w najszerszym miejscu"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Czy uprawniony do rybactwa może złagodzić wymiary, okresy i limity ochronne?",
+   a:"Nie może ich łagodzić — ma prawo je jedynie zaostrzyć.",src:R,
+   opts:["Może tylko zaostrzyć","Może dowolnie zmieniać","Może tylko złagodzić","Nie może nic zmieniać"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Czy dzień ustawowo wolny od pracy na początku/końcu okresu ochronnego skraca ten okres?",
+   a:"Tak, okres ochronny ulega skróceniu o ten dzień — z wyjątkiem węgorza i jesiotra ostronosego.",src:R,
+   opts:["Tak, poza węgorzem i jesiotrem ostronosym","Nie, nigdy","Tak, dla wszystkich gatunków","Tylko w weekendy"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Których ryb po złowieniu NIE wolno wypuszczać z powrotem do wody?",
+   a:"Gatunków obcych/inwazyjnych: m.in. trawianki, babki byczej, czebaczka amurskiego, sumika karłowatego oraz raków pręgowatego i sygnałowego.",src:R,
+   opts:["Gatunków obcych (trawianka, babka bycza, czebaczek, sumik, raki obce)","Wszystkich drapieżników","Ryb łososiowatych","Ryb powyżej 1 kg"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Jaki gatunek z rodziny dorszowatych żyje w wodach słodkich i jest poławiany na wędkę?",
+   a:"Miętus (Lota lota).",src:U,opts:["Miętus","Sum","Węgorz","Sandacz"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Czy rak błotny i rak szlachetny mogą być przedmiotem amatorskiego połowu (Okręg Gdański)?",
+   a:"Nie mogą być przedmiotem amatorskiego połowu.",src:R,
+   opts:["Nie","Tak","Tylko poza okresem ochronnym","Tylko samce"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Jakich metod i środków nie wolno używać przy połowie ryb?",
+   a:"Trucizn, ładunków wybuchowych, prądu (pola elektrycznego), głuszenia, narzędzi kaleczących (poza haczykami), sztucznego światła do wabienia oraz metody „szarpaka”.",src:R,
+   opts:["Trucizn, materiałów wybuchowych, prądu, głuszenia, szarpaka","Tylko materiałów wybuchowych","Tylko trucizn","Wszystkie metody są dozwolone"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Czy sumów powyżej wymiaru wolno wypuszczać z powrotem (Okręg Gdański)?",
+   a:"Nie — sumów wymiarowych i poza okresem ochronnym nie wolno wpuszczać z powrotem do wód użytkowanych przez PZW Okręg w Gdańsku.",src:R,
+   opts:["Nie wolno wypuszczać","Trzeba wypuścić","Tylko w rzekach","Tylko powyżej 1 m"],correct:0}),
+
+ // --- Limity połowowe (Gdańsk) ---
+ q({cat:"Limity połowowe",q:"Ile sztuk łącznie wolno zabrać w ciągu doby z grupy: troć, łosoś, sandacz, szczupak, sieja, boleń?",
+   a:"Łącznie 2 sztuki na dobę.",src:R,opts:["2 sztuki","5 sztuk","10 sztuk","Bez limitu"],correct:0}),
+ q({cat:"Limity połowowe",q:"Ile łącznie sztuk lipienia i pstrąga potokowego wolno zabrać na dobę?",
+   a:"Łącznie 2 sztuki.",src:R,opts:["2 sztuki","1 sztuka","5 sztuk","3 sztuki"],correct:0}),
+ q({cat:"Limity połowowe",q:"Jaki jest dobowy limit lina (Okręg Gdański)?",
+   a:"4 sztuki.",src:R,opts:["4 sztuki","2 sztuki","10 sztuk","Bez limitu"],correct:0}),
+ q({cat:"Limity połowowe",q:"Jaki jest dobowy limit certy (Okręg Gdański)?",
+   a:"5 sztuk.",src:R,opts:["5 sztuk","2 sztuki","3 sztuki","10 sztuk"],correct:0}),
+ q({cat:"Limity połowowe",q:"Jaki jest dobowy limit brzany i karpia (osobno)?",
+   a:"Po 3 sztuki.",src:R,opts:["3 sztuki","2 sztuki","4 sztuki","5 sztuk"],correct:0}),
+ q({cat:"Limity połowowe",q:"Ile łącznie sztuk ryb limitowanych gatunków wolno zabrać w ciągu doby?",
+   a:"Nie więcej niż 10 sztuk łącznie.",src:R,opts:["10 sztuk","5 sztuk","15 sztuk","20 sztuk"],correct:0}),
+ q({cat:"Limity połowowe",q:"Jaki jest dobowy limit wagowy ryb innych (niewymienionych) gatunków?",
+   a:"Nie więcej niż 5 kg na dobę.",src:R,opts:["5 kg","2 kg","10 kg","Bez limitu"],correct:0}),
+ q({cat:"Limity połowowe",q:"Których gatunków nie dotyczą limity ilościowe (Okręg Gdański)?",
+   a:"M.in. amura, tołpygi, krąpia, karasia srebrzystego, leszcza, suma, pstrąga tęczowego i źródlanego.",src:R,
+   opts:["Amur, tołpyga, krąp, karaś srebrzysty, leszcz, sum, pstrąg tęczowy","Szczupak i sandacz","Wszystkie ryby są limitowane","Tylko węgorz"],correct:0}),
+ q({cat:"Limity połowowe",q:"Co to jest dzienny limit wagowy?",
+   a:"Maksymalny ciężar (masa) ryb objętych wagowym limitowaniem dobowym, który wolno zabrać w ciągu doby.",src:R,
+   opts:["Maksymalny ciężar ryb do zabrania w ciągu doby","Waga jednej ryby","Waga sprzętu","Ciężar zanęty"],correct:0}),
+
+ // --- Ochrona gatunkowa: listy ---
+ q({cat:"Ochrona gatunkowa i obce",q:"Wymień przykłady ryb objętych całkowitą ochroną gatunkową.",
+   a:"M.in. różanka, piskorz, strzebla błotna, koza, minogi (wszystkie), jesiotr ostronosy i zachodni, ciosa, głowacz białopłetwy, parposz, śliz.",src:R}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Wymień przykłady ryb uznanych za gatunki obce.",
+   a:"M.in. amur biały, babka bycza, czebaczek amurski, karaś srebrzysty, pstrąg tęczowy, sumik karłowaty, tołpyga biała i pstra, trawianka, bass słoneczny i wielkogębowy.",src:U}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Na czym polega ochrona gatunkowa ryb?",
+   a:"Na całkowitym zakazie połowu chronionego gatunku (zabijania, chwytania, przetrzymywania, pozyskiwania) oraz niszczenia jego siedlisk.",src:U,
+   opts:["Całkowity zakaz połowu i niszczenia siedlisk","Zakaz tylko w okresie tarła","Limit 1 szt. dziennie","Zakaz sprzedaży"],correct:0}),
+
+ // --- Obręby / dodatkowe ---
+ q({cat:"Przepisy i dokumenty",q:"W jakim celu ustanawia się obręby ochronne?",
+   a:"Aby chronić ryby w miejscach ich tarła, rozwoju narybku, gromadnego zimowania, bytowania i przepływu. W obrębach ochronnych obowiązuje zakaz połowu.",src:RZ,
+   opts:["Ochrona ryb w miejscach tarła i zimowania","Wyznaczenie kąpielisk","Miejsca dla łodzi","Strefy dla dzieci"],correct:0}),
+ q({cat:"Ochrona gatunkowa i obce",q:"Czy wolno używać żywej ryby jako przynęty i skąd może pochodzić?",
+   a:"Wolno, jeśli zezwolenie nie zabrania — ale tylko ryby wymiarowej, nie chronionej i nie w okresie ochronnym, pozyskanej z tego samego łowiska.",src:R,
+   opts:["Tylko ryba wymiarowa z tego samego łowiska","Dowolna ryba z dowolnego zbiornika","Tylko ryba kupiona w sklepie","Żywej ryby nie wolno używać nigdy"],correct:0}),
+];
+
+/* build species cards */
+const SPECIES_SIZE=SIZES.map(([n,cm])=>{const m=sizeMC(cm);return q({cat:"Wymiary ochronne",
+  q:"Jaki jest wymiar ochronny — "+n+" (Okręg Gdański)?",a:cm+" cm.",src:R,opts:m.opts,correct:m.correct});});
+const SPECIES_SEASON=SEASONS.map(([n,s])=>{const m=seasonMC(s);return q({cat:"Okresy ochronne",
+  q:"Jaki jest okres ochronny — "+n+" (Okręg Gdański)?",a:s+".",src:R,opts:m.opts,correct:m.correct});});
+
+const BANK=[...CURATED,...SPECIES_SIZE,...SPECIES_SEASON];
+const CATS=[...new Set(BANK.map(c=>c.cat))];
+
+/* ================= state & persistence ================= */
+const KEY="karta-wedkarska-gdansk-v1";
+let store={mastered:{},bestExam:null};
+try{const s=localStorage.getItem(KEY); if(s) store=JSON.parse(s);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+const $=id=>document.getElementById(id);
+
+/* ================= NAUKA (cram mastery loop) ================= */
+let curCat="__all__", queue=[], box={}, cur=null;
+
+function filtered(){return curCat==="__all__"?BANK:BANK.filter(c=>c.cat===curCat);}
+function buildQueue(){
+  const items=filtered();
+  box={}; queue=[];
+  items.forEach(c=>{ if(store.mastered[c.id]){box[c.id]=2;} else {box[c.id]=0; queue.push(c.id);} });
+  queue=shuffle(queue);
+}
+function renderChips(){
+  const el=$("l-chips"); el.innerHTML="";
+  const mk=(id,label)=>{const b=document.createElement("button");b.className="chip";b.textContent=label;
+    b.setAttribute("aria-pressed",curCat===id); b.onclick=()=>{curCat=id;buildQueue();renderLearn();}; return b;};
+  el.appendChild(mk("__all__","Wszystko"));
+  CATS.forEach(c=>el.appendChild(mk(c,c)));
+}
+function masteredCount(items){return items.filter(c=>store.mastered[c.id]).length;}
+function renderGauge(ring,txt,gh,gp,items){
+  const total=items.length, done=masteredCount(items), pct=total?Math.round(done/total*100):0;
+  $(ring).style.setProperty("--p",pct); $(txt).textContent=pct+"%";
+  $(gh).textContent="Opanowane: "+done+" / "+total;
+  if(gp) $(gp).textContent = pct>=90?"Świetnie — jesteś gotowy. Zrób jeszcze egzamin próbny."
+    : pct>=50?"Dobrze idzie. Dokończ pozostałe karty i przećwicz słabe działy."
+    : "Oceniaj każdą kartę szczerze. „Umiem” dwa razy — karta znika na dziś.";
+}
+function renderLearn(){
+  renderChips();
+  renderGauge("l-ring","l-ringtxt","l-gh","l-gp",filtered());
+  $("l-cat-lbl").textContent=curCat==="__all__"?"":curCat;
+  $("l-left").textContent=queue.length;
+  if(queue.length===0){ $("l-card").hidden=true; $("l-done").hidden=false;
+    $("l-done-msg").textContent = masteredCount(filtered())>0?"Gotowe!":"Brak kart"; return; }
+  $("l-done").hidden=true; $("l-card").hidden=false;
+  cur=BANK.find(c=>c.id===queue[0]);
+  $("l-cat").textContent=cur.cat; $("l-q").textContent=cur.q;
+  $("l-a").textContent=cur.a; $("l-src").textContent="Źródło: "+cur.src;
+  $("l-answer").hidden=true; $("l-reveal").hidden=false; $("l-grade").hidden=true;
+  const b=box[cur.id]||0; $("l-grade").querySelector(".g-know .tiny").textContent=(b>=1?"2 z 2 — opanowane":"1 z 2");
+}
+function reveal(){$("l-answer").hidden=false;$("l-reveal").hidden=true;$("l-grade").hidden=false;}
+function grade(g){
+  const id=queue.shift();
+  const insert=(pos)=>{const p=Math.min(pos,queue.length);queue.splice(p,0,id);};
+  if(g==="nie"){ box[id]=0; insert(4); }
+  else if(g==="prawie"){ insert(Math.max(9,queue.length)); }   // later in the round
+  else { // umiem
+    box[id]=(box[id]||0)+1;
+    if(box[id]>=2){ store.mastered[id]=true; save(); }          // retired for today
+    else insert(queue.length);                                  // one more confirmation
+  }
+  renderLearn();
+}
+function restartSession(){ buildQueue(); renderLearn(); }
+
+/* ================= EGZAMIN ================= */
+const MC=BANK.filter(c=>c.opts);
+let exam=[], eIdx=0, eScore=0, eMissed=[], eCatStat={};
+let examLen=20;
+function renderLens(){
+  const el=$("e-lens"); el.innerHTML="";
+  [10,20,30].forEach(n=>{const b=document.createElement("button");b.className="chip";
+    b.textContent=n+" pytań";b.setAttribute("aria-pressed",examLen===n);
+    b.onclick=()=>{examLen=n;renderLens();};el.appendChild(b);});
+}
+function startExam(){
+  const n=Math.min(examLen,MC.length);
+  exam=shuffle(MC).slice(0,n).map(item=>{
+    const order=shuffle(item.opts.map((t,i)=>({t,ok:i===item.correct})));
+    return {cat:item.cat,q:item.q,src:item.src,opts:order,correct:order.findIndex(o=>o.ok)};
+  });
+  eIdx=0;eScore=0;eMissed=[];eCatStat={};
+  $("exam-intro").hidden=true;$("exam-results").hidden=true;$("exam-run").hidden=false;
+  $("e-tot").textContent=exam.length;
+  renderExamQ();
+}
+function renderExamQ(){
+  const it=exam[eIdx];
+  $("e-n").textContent=eIdx+1; $("e-sc").textContent=eScore;
+  $("e-prog").style.width=(eIdx/exam.length*100)+"%";
+  $("e-cat").textContent=it.cat; $("e-q").textContent=it.q; $("e-src").hidden=true;
+  const box=$("e-opts");box.innerHTML="";
+  it.opts.forEach((o,i)=>{const b=document.createElement("button");b.className="opt";
+    b.innerHTML='<span class="key">'+"ABCD"[i]+'</span><span>'+o.t+'</span>';
+    b.onclick=()=>pick(i);box.appendChild(b);});
+}
+function pick(i){
+  const it=exam[eIdx];
+  eCatStat[it.cat]=eCatStat[it.cat]||{ok:0,n:0}; eCatStat[it.cat].n++;
+  const ok=i===it.correct;
+  if(ok){eScore++; eCatStat[it.cat].ok++;} else eMissed.push(it);
+  [...$("e-opts").children].forEach((el,j)=>{el.disabled=true;
+    if(j===it.correct)el.classList.add("correct"); else if(j===i)el.classList.add("wrong");});
+  $("e-sc").textContent=eScore;
+  $("e-src").hidden=false; $("e-src").textContent="Źródło: "+it.src;
+  setTimeout(()=>{eIdx++; if(eIdx>=exam.length) showResults(); else renderExamQ();}, ok?700:1500);
+}
+function showResults(){
+  $("exam-run").hidden=true;$("exam-results").hidden=false;
+  const pct=Math.round(eScore/exam.length*100), pass=pct>=70;
+  const sc=$("r-score"); sc.textContent=eScore+" / "+exam.length; sc.className="score "+(pass?"pass":"fail");
+  const v=$("r-verdict"); v.textContent=(pass?"✓ Zdany":"✗ Niezdany")+"  ("+pct+"%, próg 70%)";
+  v.className="verdict "+(pass?"pass":"fail");
+  if(!store.bestExam||pct>store.bestExam){store.bestExam=pct;save();}
+  const bars=$("r-bars");bars.innerHTML="";
+  Object.keys(eCatStat).sort().forEach(cat=>{const s=eCatStat[cat],p=Math.round(s.ok/s.n*100);
+    const cls=p>=70?"":p>=40?"mid":"low";
+    bars.insertAdjacentHTML("beforeend",
+      '<div class="bar-row"><div class="lab"><span>'+cat+'</span><b>'+s.ok+'/'+s.n+'</b></div>'+
+      '<div class="bar '+cls+'"><span style="width:'+p+'%"></span></div></div>');});
+  const miss=$("r-miss");
+  if(eMissed.length){miss.innerHTML='<h4>Do powtórki ('+eMissed.length+')</h4>'+eMissed.map(it=>
+    '<div class="miss-item"><div class="mq">'+it.q+'</div><div class="ma">✓ '+it.opts[it.correct].t+'</div></div>').join("");}
+  else miss.innerHTML='<h4>Komplet — żadnego błędu 🎣</h4>';
+}
+
+/* ================= POSTĘPY ================= */
+function renderStats(){
+  renderGauge("s-ring","s-ringtxt","s-gh","s-gp",BANK);
+  $("s-gp").textContent = store.bestExam!=null?("Najlepszy egzamin próbny: "+store.bestExam+"%."):"Nie podszedłeś jeszcze do egzaminu próbnego.";
+  const bars=$("s-bars");bars.innerHTML="";
+  CATS.map(cat=>{const items=BANK.filter(c=>c.cat===cat);const done=masteredCount(items);
+    return {cat,done,total:items.length,p:Math.round(done/items.length*100)};})
+    .sort((a,b)=>a.p-b.p)
+    .forEach(r=>{const cls=r.p>=70?"":r.p>=40?"mid":"low";
+      bars.insertAdjacentHTML("beforeend",
+        '<div class="bar-row"><div class="lab"><span>'+r.cat+'</span><b>'+r.done+'/'+r.total+'</b></div>'+
+        '<div class="bar '+cls+'"><span style="width:'+r.p+'%"></span></div></div>');});
+}
+function resetAll(){
+  if(!confirm("Wyczyścić cały zapisany postęp (opanowane karty i wynik egzaminu)?"))return;
+  store={mastered:{},bestExam:null};save();buildQueue();renderLearn();renderStats();
+}
+
+/* ================= navigation ================= */
+function show(which){
+  ["learn","exam","stats"].forEach(s=>$(s).hidden=(s!==which));
+  $("tab-learn").setAttribute("aria-selected",which==="learn");
+  $("tab-exam").setAttribute("aria-selected",which==="exam");
+  $("tab-stats").setAttribute("aria-selected",which==="stats");
+  if(which==="learn")renderLearn();
+  if(which==="exam"){$("exam-intro").hidden=false;$("exam-run").hidden=true;$("exam-results").hidden=true;renderLens();}
+  if(which==="stats")renderStats();
+}
+buildQueue(); renderLearn();
+</script>
